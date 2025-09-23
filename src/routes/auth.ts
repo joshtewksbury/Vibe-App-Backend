@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
@@ -10,7 +10,7 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 // Sign up
-router.post('/signup', asyncHandler(async (req, res) => {
+router.post('/signup', asyncHandler(async (req: Request, res: Response) => {
   const { error, value } = validateSignUp(req.body);
   if (error) {
     throw createError(error.details[0].message, 400);
@@ -50,10 +50,14 @@ router.post('/signup', asyncHandler(async (req, res) => {
   });
 
   // Generate JWT token
+  if (!process.env.JWT_SECRET) {
+    throw createError('JWT configuration error', 500);
+  }
+
   const token = jwt.sign(
     { userId: user.id, email: user.email },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    process.env.JWT_SECRET as string,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
   );
 
   res.status(201).json({
@@ -65,7 +69,7 @@ router.post('/signup', asyncHandler(async (req, res) => {
 }));
 
 // Sign in
-router.post('/signin', asyncHandler(async (req, res) => {
+router.post('/signin', asyncHandler(async (req: Request, res: Response) => {
   const { error, value } = validateSignIn(req.body);
   if (error) {
     throw createError(error.details[0].message, 400);
@@ -89,10 +93,14 @@ router.post('/signin', asyncHandler(async (req, res) => {
   }
 
   // Generate JWT token
+  if (!process.env.JWT_SECRET) {
+    throw createError('JWT configuration error', 500);
+  }
+
   const token = jwt.sign(
     { userId: user.id, email: user.email },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    process.env.JWT_SECRET as string,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
   );
 
   // Update last active time
@@ -118,7 +126,7 @@ router.post('/signin', asyncHandler(async (req, res) => {
 }));
 
 // Sign out
-router.post('/signout', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.post('/signout', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   // In a more complex implementation, you might want to blacklist the JWT token
   // For now, we'll just return success as the client will discard the token
   res.json({
@@ -127,14 +135,18 @@ router.post('/signout', authMiddleware, asyncHandler(async (req: AuthenticatedRe
 }));
 
 // Refresh token
-router.post('/refresh', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.post('/refresh', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user!.id;
+
+  if (!process.env.JWT_SECRET) {
+    throw createError('JWT configuration error', 500);
+  }
 
   // Generate new JWT token
   const token = jwt.sign(
     { userId, email: req.user!.email },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    process.env.JWT_SECRET as string,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
   );
 
   res.json({
@@ -144,7 +156,7 @@ router.post('/refresh', authMiddleware, asyncHandler(async (req: AuthenticatedRe
 }));
 
 // Get current user profile
-router.get('/me', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res) => {
+router.get('/me', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user!.id },
     select: {

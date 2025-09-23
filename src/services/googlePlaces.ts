@@ -17,6 +17,21 @@ export interface PlaceDetailsResponse {
   status: string;
 }
 
+interface PlaceSearchResponse {
+  results?: Array<{
+    place_id?: string;
+    name?: string;
+    formatted_address?: string;
+    geometry?: {
+      location?: {
+        lat: number;
+        lng: number;
+      };
+    };
+  }>;
+  status: string;
+}
+
 export class GooglePlacesService {
   private apiKey: string;
   private baseURL = 'https://maps.googleapis.com/maps/api/place';
@@ -74,7 +89,7 @@ export class GooglePlacesService {
         params.radius = 5000; // 5km radius
       }
 
-      const response = await axios.get(url, { params });
+      const response = await axios.get<PlaceSearchResponse>(url, { params });
 
       if (response.data.status === 'OK') {
         return response.data.results || [];

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { asyncHandler, createError } from '../middleware/errorHandler';
 import { AuthenticatedRequest, requireRole, requireVenueAccess } from '../middleware/auth';
@@ -18,7 +18,7 @@ const serpApiService = new SerpAPIService();
 const googlePlacesService = new GooglePlacesService();
 
 // GET /venues - Get all venues with optional filtering
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/', asyncHandler(async (req: Request, res: Response) => {
   const { lat, lng, radius = 10000, category, limit = 50, offset = 0 } = req.query;
 
   let whereClause: any = {};
@@ -95,7 +95,7 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 // GET /venues/:id - Get single venue
-router.get('/:id', asyncHandler(async (req, res) => {
+router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   const venue = await prisma.venue.findUnique({

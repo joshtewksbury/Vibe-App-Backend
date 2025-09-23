@@ -8,6 +8,20 @@ export interface SerpPopularTimesData {
   source: string;
 }
 
+interface SerpAPIResponse {
+  local_results?: Array<{
+    title?: string;
+    address?: string;
+    hours?: string[];
+    popular_times?: any;
+    open_state?: {
+      is_open?: boolean;
+      text?: string;
+    };
+  }>;
+  status?: string;
+}
+
 export class SerpAPIService {
   private apiKey: string;
   private baseURL = 'https://serpapi.com/search';
@@ -35,7 +49,7 @@ export class SerpAPIService {
         api_key: this.apiKey
       };
 
-      const response = await axios.get(this.baseURL, { params });
+      const response = await axios.get<SerpAPIResponse>(this.baseURL, { params });
 
       if (response.data.local_results && response.data.local_results.length > 0) {
         const result = response.data.local_results[0];
@@ -73,7 +87,7 @@ export class SerpAPIService {
         api_key: this.apiKey
       };
 
-      const response = await axios.get(this.baseURL, { params });
+      const response = await axios.get<SerpAPIResponse>(this.baseURL, { params });
 
       if (response.data.local_results && response.data.local_results.length > 0) {
         const result = response.data.local_results[0];
