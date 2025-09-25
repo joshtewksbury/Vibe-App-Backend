@@ -81,6 +81,7 @@ model Venue {
   deals            Deal[]
   events           Event[]
   stories          Story[]
+  venueImages      VenueImage[]
 
   @@map("venues")
 }
@@ -190,6 +191,39 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+model VenueImage {
+  id           String         @id @default(cuid())
+  venueId      String
+  imageType    VenueImageType
+  url          String
+  thumbnailUrl String?
+  altText      String?
+  caption      String?
+  uploadedBy   String?
+  uploadedAt   DateTime       @default(now())
+  isActive     Boolean        @default(true)
+  displayOrder Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  // Image metadata
+  width        Int?
+  height       Int?
+  fileSize     Int?
+  format       String?
+  colorPalette String[] // Array of hex color codes
+  isPortrait   Boolean?
+  aspectRatio  Float?
+
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  @@map("venue_images")
+  @@index([venueId])
+  @@index([imageType])
+  @@index([isActive])
+  @@index([venueId, imageType, isActive])
+}
+
 // Enums
 enum Gender {
   MALE
@@ -222,4 +256,17 @@ enum BusyStatus {
 enum MediaType {
   IMAGE
   VIDEO
+}
+
+enum VenueImageType {
+  ICON
+  BANNER
+  GALLERY
+  MENU
+  INTERIOR
+  EXTERIOR
+  FOOD
+  DRINKS
+  ATMOSPHERE
+  EVENTS
 }

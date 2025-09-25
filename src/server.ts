@@ -11,8 +11,10 @@ import { auditLogger } from './middleware/auditLogger';
 // Route imports
 import authRoutes from './routes/auth';
 import venueRoutes from './routes/venues';
+import venueImageRoutes from './routes/venueImages';
 import userRoutes from './routes/users';
 import feedRoutes from './routes/feed';
+import heatmapRoutes from './routes/heatmap';
 
 // Load environment variables
 config();
@@ -54,8 +56,10 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/auth', authRoutes);
 app.use('/venues', authMiddleware, venueRoutes);
+app.use('/', venueImageRoutes); // Image routes include their own auth middleware
 app.use('/users', authMiddleware, userRoutes);
 app.use('/feed', authMiddleware, feedRoutes);
+app.use('/heatmap', heatmapRoutes); // Heat map routes include their own auth middleware
 
 // Error handling
 app.use(errorHandler);
