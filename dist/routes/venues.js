@@ -58,18 +58,28 @@ router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
                 },
                 orderBy: { timestamp: 'desc' },
                 take: 1
+            },
+            venueImages: {
+                where: {
+                    imageType: 'ICON',
+                    isActive: true
+                },
+                take: 1
             }
         }
     });
     // Add current busy status to each venue
     const venuesWithStatus = venues.map(venue => {
         const latestSnapshot = venue.busySnapshots[0];
+        const iconImage = venue.venueImages?.[0];
         return {
             ...venue,
             currentStatus: latestSnapshot?.status || 'MODERATE',
             currentOccupancy: latestSnapshot?.occupancyCount || 0,
             occupancyPercentage: latestSnapshot?.occupancyPercentage || 0,
-            busySnapshots: undefined // Remove from response
+            venueIcon: iconImage?.url || null,
+            busySnapshots: undefined, // Remove from response
+            venueImages: undefined // Remove from response
         };
     });
     res.json({
@@ -110,13 +120,27 @@ router.get('/:id', (0, errorHandler_1.asyncHandler)(async (req, res) => {
                     startTime: { gte: new Date() }
                 },
                 orderBy: { startTime: 'asc' }
+            },
+            venueImages: {
+                where: {
+                    isActive: true
+                },
+                orderBy: {
+                    displayOrder: 'asc'
+                }
             }
         }
     });
     if (!venue) {
         throw (0, errorHandler_1.createError)('Venue not found', 404);
     }
-    res.json({ venue });
+    // Extract icon image
+    const iconImage = venue.venueImages?.find(img => img.imageType === 'ICON');
+    const venueWithIcon = {
+        ...venue,
+        venueIcon: iconImage?.url || null
+    };
+    res.json({ venue: venueWithIcon });
 }));
 // GET /venues/:id/busy - Get venue busy data
 router.get('/:id/busy', (0, errorHandler_1.asyncHandler)(async (req, res) => {
