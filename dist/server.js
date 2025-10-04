@@ -20,6 +20,7 @@ const venueImages_1 = __importDefault(require("./routes/venueImages"));
 const users_1 = __importDefault(require("./routes/users"));
 const feed_1 = __importDefault(require("./routes/feed"));
 const heatmap_1 = __importDefault(require("./routes/heatmap"));
+const images_1 = __importDefault(require("./routes/images"));
 // Load environment variables
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
@@ -78,13 +79,11 @@ process.on('SIGTERM', async () => {
     await prisma.$disconnect();
     process.exit(0);
 });
+app.use(images_1.default);
 // Start server
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔗 Health check: http://localhost:${PORT}/health`);
 });
-
-const imageRoutes = require('./routes/images');
-app.use(imageRoutes);
 //# sourceMappingURL=server.js.map
