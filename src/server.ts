@@ -15,6 +15,7 @@ import venueImageRoutes from './routes/venueImages';
 import userRoutes from './routes/users';
 import feedRoutes from './routes/feed';
 import heatmapRoutes from './routes/heatmap';
+import imageRoutes from './routes/images';
 
 // Load environment variables
 config();
@@ -84,7 +85,7 @@ process.on('SIGTERM', async () => {
   await prisma.$disconnect();
   process.exit(0);
 });
-
+app.use(imageRoutes);
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
