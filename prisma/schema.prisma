@@ -37,6 +37,20 @@ model User {
   events           Event[]
   refreshTokens    RefreshToken[]
 
+  // Friendship relations
+  friendshipsInitiated Friendship[] @relation("FriendshipInitiator")
+  friendshipsReceived  Friendship[] @relation("FriendshipReceiver")
+
+  // Messaging relations
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+  conversationParticipants ConversationParticipant[]
+
+  // Encryption keys for E2EE messaging
+  publicKey        String?
+  encryptedPrivateKey String?
+  keyCreatedAt     DateTime?
+
   @@map("users")
 }
 
@@ -269,4 +283,130 @@ enum VenueImageType {
   DRINKS
   ATMOSPHERE
   EVENTS
+}
+
+// MARK: - Friends & Messaging Models
+
+model Friendship {
+  id          String           @id @default(cuid())
+  initiatorId String
+  receiverId  String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  acceptedAt  DateTime?
+  blockedAt   DateTime?
+
+  // Location sharing
+  isLocationSharingEnabled Boolean @default(false)
+  lastSharedLocation       Json?   // {latitude, longitude, venueId, venueName, timestamp, accuracy}
+
+  initiator User @relation("FriendshipInitiator", fields: [initiatorId], references: [id], onDelete: Cascade)
+  receiver  User @relation("FriendshipReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([initiatorId, receiverId])
+  @@map("friendships")
+  @@index([initiatorId])
+  @@index([receiverId])
+  @@index([status])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  type      ConversationType @default(DIRECT)
+  name      String?  // For group chats
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime @default(now())
+  lastReadAt     DateTime @default(now())
+  leftAt         DateTime?
+  isActive       Boolean  @default(true)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@map("conversation_participants")
+  @@index([userId])
+  @@index([conversationId])
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  senderId       String
+  recipientId    String?     // For direct messages
+
+  // Encrypted content
+  encryptedContent String    // AES-256 encrypted message content
+  iv               String    // Initialization vector for AES
+
+  // Message metadata (not encrypted)
+  messageType    MessageType @default(TEXT)
+  venueId        String?     // For venue sharing messages
+  mediaUrl       String?     // For media messages
+  isEdited       Boolean     @default(false)
+  isDeleted      Boolean     @default(false)
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  editedAt       DateTime?
+  deletedAt      DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient    User?        @relation("MessageReceiver", fields: [recipientId], references: [id], onDelete: SetNull)
+  readReceipts MessageReadReceipt[]
+
+  @@map("messages")
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([createdAt])
+}
+
+model MessageReadReceipt {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@map("message_read_receipts")
+  @@index([messageId])
+}
+
+// Additional Enums
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+  REJECTED
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
+enum MessageType {
+  TEXT
+  VENUE_SHARE
+  LOCATION_SHARE
+  MEETUP_REQUEST
+  IMAGE
+  VIDEO
 }

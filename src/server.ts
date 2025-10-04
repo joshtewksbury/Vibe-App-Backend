@@ -16,6 +16,8 @@ import userRoutes from './routes/users';
 import feedRoutes from './routes/feed';
 import heatmapRoutes from './routes/heatmap';
 import imageRoutes from './routes/images';
+import friendsRoutes from './routes/friends';
+import messagesRoutes from './routes/messages';
 
 // Load environment variables
 config();
@@ -61,6 +63,8 @@ app.use('/', venueImageRoutes); // Image routes include their own auth middlewar
 app.use('/users', authMiddleware, userRoutes);
 app.use('/feed', authMiddleware, feedRoutes);
 app.use('/heatmap', heatmapRoutes); // Heat map routes include their own auth middleware
+app.use('/friends', friendsRoutes); // Friends routes include their own auth middleware
+app.use('/messages', messagesRoutes); // Messages routes include their own auth middleware
 
 // Error handling
 app.use(errorHandler);

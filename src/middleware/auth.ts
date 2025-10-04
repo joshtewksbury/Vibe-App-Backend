@@ -7,11 +7,15 @@ const prisma = new PrismaClient();
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
+    userId: string; // Alias for id
     email: string;
     role: string;
     venueIds: string[];
   };
 }
+
+// Alias for compatibility
+export type AuthRequest = AuthenticatedRequest;
 
 export const authMiddleware = async (
   req: AuthenticatedRequest,
@@ -69,6 +73,7 @@ export const authMiddleware = async (
     // Attach user to request
     req.user = {
       id: user.id,
+      userId: user.id, // Alias for compatibility
       email: user.email,
       role: user.role,
       venueIds: user.venueIds
