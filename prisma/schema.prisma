@@ -86,6 +86,8 @@ model Venue {
   images           String[]
   placeId          String?          // Google Places ID
   businessStatus   String?
+  popularTimes     Json?            // Google Popular Times data from SerpAPI
+  popularTimesUpdated DateTime?     // When popular times were last fetched
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 

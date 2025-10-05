@@ -51,6 +51,7 @@ const authMiddleware = async (req, res, next) => {
         // Attach user to request
         req.user = {
             id: user.id,
+            userId: user.id, // Alias for compatibility
             email: user.email,
             role: user.role,
             venueIds: user.venueIds

@@ -21,6 +21,8 @@ const users_1 = __importDefault(require("./routes/users"));
 const feed_1 = __importDefault(require("./routes/feed"));
 const heatmap_1 = __importDefault(require("./routes/heatmap"));
 const images_1 = __importDefault(require("./routes/images"));
+const friends_1 = __importDefault(require("./routes/friends"));
+const messages_1 = __importDefault(require("./routes/messages"));
 // Load environment variables
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
@@ -54,11 +56,13 @@ app.get('/health', (req, res) => {
 });
 // API routes
 app.use('/auth', auth_2.default);
-app.use('/venues', auth_1.authMiddleware, venues_1.default);
+app.use('/venues', venues_1.default); // Venues endpoint now public (no auth required)
 app.use('/', venueImages_1.default); // Image routes include their own auth middleware
 app.use('/users', auth_1.authMiddleware, users_1.default);
 app.use('/feed', auth_1.authMiddleware, feed_1.default);
 app.use('/heatmap', heatmap_1.default); // Heat map routes include their own auth middleware
+app.use('/friends', friends_1.default); // Friends routes include their own auth middleware
+app.use('/messages', messages_1.default); // Messages routes include their own auth middleware
 // Error handling
 app.use(errorHandler_1.errorHandler);
 // 404 handler
