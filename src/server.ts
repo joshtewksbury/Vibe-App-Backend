@@ -58,7 +58,7 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/auth', authRoutes);
-app.use('/venues', authMiddleware, venueRoutes);
+app.use('/venues', venueRoutes); // Venues endpoint now public (no auth required)
 app.use('/', venueImageRoutes); // Image routes include their own auth middleware
 app.use('/users', authMiddleware, userRoutes);
 app.use('/feed', authMiddleware, feedRoutes);
