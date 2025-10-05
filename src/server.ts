@@ -60,7 +60,7 @@ app.get('/health', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/venues', venueRoutes); // Venues endpoint now public (no auth required)
 app.use('/', venueImageRoutes); // Image routes include their own auth middleware
-app.use('/users', authMiddleware, userRoutes);
+app.use('/users', userRoutes); // Users endpoint now public for search (individual routes can add auth as needed)
 app.use('/feed', authMiddleware, feedRoutes);
 app.use('/heatmap', heatmapRoutes); // Heat map routes include their own auth middleware
 app.use('/friends', friendsRoutes); // Friends routes include their own auth middleware
