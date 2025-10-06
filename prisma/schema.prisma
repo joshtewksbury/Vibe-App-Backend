@@ -353,6 +353,7 @@ model Message {
   // Encrypted content
   encryptedContent String    // AES-256 encrypted message content
   iv               String    // Initialization vector for AES
+  authTag          String?   // Authentication tag for AES-GCM
 
   // Message metadata (not encrypted)
   messageType    MessageType @default(TEXT)
