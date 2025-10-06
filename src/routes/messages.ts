@@ -90,6 +90,7 @@ router.get('/conversations', authMiddleware, async (req: AuthRequest, res: Respo
           senderName: `${lastMessage.sender.firstName} ${lastMessage.sender.lastName}`,
           encryptedContent: lastMessage.encryptedContent,
           iv: lastMessage.iv,
+          authTag: lastMessage.authTag,
           messageType: lastMessage.messageType,
           createdAt: lastMessage.createdAt
         } : null,
@@ -179,6 +180,7 @@ router.get('/conversations/:conversationId', authMiddleware, async (req: AuthReq
       recipientId: msg.recipientId,
       encryptedContent: msg.encryptedContent,
       iv: msg.iv,
+      authTag: msg.authTag,
       messageType: msg.messageType,
       venueId: msg.venueId,
       mediaUrl: msg.mediaUrl,
@@ -315,6 +317,7 @@ router.post('/send', authMiddleware, async (req: AuthRequest, res: Response) => 
       conversationId,
       encryptedContent,
       iv,
+      authTag,
       messageType = 'TEXT',
       venueId,
       mediaUrl
@@ -375,6 +378,7 @@ router.post('/send', authMiddleware, async (req: AuthRequest, res: Response) => 
         recipientId,
         encryptedContent,
         iv,
+        authTag: authTag || null,
         messageType: messageType as any,
         venueId: venueId || null,
         mediaUrl: mediaUrl || null
