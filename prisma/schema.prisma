@@ -84,6 +84,9 @@ model Venue {
   bookingURL       String?
   phoneNumber      String?
   images           String[]
+  venueIcon        String?          // Venue icon/logo image URL
+  genderSplit      Json?            @map("gender_split") // Gender demographics {male: Int, female: Int}
+  averageAge       Int?             @map("average_age") // Average age of venue goers
   placeId          String?          // Google Places ID
   businessStatus   String?
   popularTimes     Json?            // Google Popular Times data from SerpAPI
