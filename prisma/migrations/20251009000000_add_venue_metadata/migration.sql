@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "venues" ADD COLUMN IF NOT EXISTS "venueIcon" TEXT,
+ADD COLUMN IF NOT EXISTS "gender_split" JSONB,
+ADD COLUMN IF NOT EXISTS "average_age" INTEGER;
