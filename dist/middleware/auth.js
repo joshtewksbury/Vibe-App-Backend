@@ -43,11 +43,16 @@ const authMiddleware = async (req, res, next) => {
                 message: 'User not found'
             });
         }
-        // Update last active time
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { lastActiveAt: new Date() }
-        });
+        // Update last active time only if it's been more than 1 hour
+        // This prevents a database write on every request, improving performance
+        const shouldUpdate = (Date.now() - user.lastActiveAt.getTime()) / (1000 * 60 * 60) >= 1;
+        if (shouldUpdate) {
+            // Fire and forget - don't await to avoid blocking the request
+            prisma.user.update({
+                where: { id: user.id },
+                data: { lastActiveAt: new Date() }
+            }).catch(err => console.error('Failed to update lastActiveAt:', err));
+        }
         // Attach user to request
         req.user = {
             id: user.id,

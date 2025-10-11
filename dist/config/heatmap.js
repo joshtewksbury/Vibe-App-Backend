@@ -14,9 +14,11 @@ exports.heatmapConfig = {
     // Normalization parameters
     percentileClip: 0.95,
     gamma: 0.8,
-    // Cache settings
-    cacheTTL: parseInt(process.env.HEATMAP_CACHE_TTL || '300'), // 5 minutes
-    tileUpdateInterval: parseInt(process.env.HEATMAP_UPDATE_INTERVAL || '120'), // 2 minutes
+    // Gaussian blur parameters - reduced for better performance
+    gaussianBlurSigma: 4, // Reduced from 8 for faster rendering
+    // Cache settings - longer cache for better performance
+    cacheTTL: parseInt(process.env.HEATMAP_CACHE_TTL || '3600'), // 1 hour (was 5 min)
+    tileUpdateInterval: parseInt(process.env.HEATMAP_UPDATE_INTERVAL || '300'), // 5 minutes
     // Performance settings
     maxVenuesPerTile: 1000, // Limit venues processed per tile
     // Default bounds (can be overridden by user location)

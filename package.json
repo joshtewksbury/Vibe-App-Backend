@@ -15,6 +15,9 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.16.2",
+    "@sentry/node": "^10.19.0",
+    "@sentry/tracing": "^7.120.4",
+    "@types/morgan": "^1.9.10",
     "aws-sdk": "^2.1490.0",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",

@@ -68,20 +68,96 @@ router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
             }
         }
     });
-    // Add current busy status to each venue
-    const venuesWithStatus = venues.map(venue => {
+    // Add current busy status and ensure popular times for each venue
+    const venuesWithStatus = await Promise.all(venues.map(async (venue) => {
         const latestSnapshot = venue.busySnapshots[0];
         const iconImage = venue.venueImages?.[0];
+        // Ensure venue has popular times (fetch if missing or outdated)
+        const venueWithPopularTimes = await ensurePopularTimes(venue);
+        // Get icon URL from hosted images in /uploads
+        // Map venue names to their actual filenames (from upload_venue_icons.js)
+        const venueNameToFilename = {
+            'Hey Chica': 'heychica.jpg',
+            'Iris Rooftop': 'irisrooftop.jpg',
+            'The MET': 'themet.jpg',
+            'The Beat': 'thebeat.jpg',
+            'Honky Tonks': 'honkytonks.jpg',
+            'Black Bear Lodge': 'blackbearlodge.jpg',
+            'Su Casa': 'sucasa.jpg',
+            'The Boundary': 'theboundary.jpg',
+            'Archive': 'archive.jpg',
+            'Prohibition': 'prohibition.jpg',
+            'Birdees': 'birdees.jpg',
+            'Sixes and Sevens': 'sixesandsevens.jpg',
+            "Johnny Ringo's": 'johnnyringos.jpg',
+            'Maya Rooftop Bar': 'maya.jpg',
+            'Osbourne Hotel': 'osbournehotel.jpg',
+            'Regatta Hotel': 'regatta.jpg',
+            'Rics Bar': 'ricsbar.jpg',
+            'Royal Exchange Hotel': 'royalexchangehotel.jpg',
+            'Sixteen Antlers': 'sixteenantlers.jpg',
+            'Soko': 'soko.jpg',
+            'The Tax Office': 'taxoffice.jpg',
+            'Warehouse 25': 'warehouse25.jpg',
+            'Riverland Brisbane': 'riverland.jpg',
+            'Blackbird Brisbane': 'blackbird.jpg',
+            "Friday's Riverside Brisbane": 'fridays.jpg',
+            'Riverbar & Kitchen Brisbane': 'riverbarandkitchen.jpg',
+            'Bar Pacino Brisbane': 'barpacino.jpg',
+            'Hotel West End': 'hotelwestend.jpg',
+            'The Normanby Hotel': 'thenormanbyhotel.jpg',
+            'The Newmarket Hotel': 'newmarkethotel.jpg',
+            'Eclipse Nightclub': 'eclipse.jpg',
+            'Retros': 'retros.jpg',
+            'The Triffid': 'thetriffid.jpg',
+            'The Tivoli': 'thetivoli.jpg',
+            "Mr Percival's": 'mrpercivals.jpg',
+            'The Lobby Bar': 'lobbybar.jpg',
+            'Jubilee Hotel': 'jubileehotel.jpg',
+            'Alfred & Constance': 'alfredandconstance.jpg',
+            'The Star Brisbane': 'thestarbrisbane.jpg',
+            'Felons Brewing Co': 'felons.jpg',
+            'Pawn & Co Brisbane': 'pawn&co.jpg',
+            'Wonderland': 'wonderland.jpg',
+            'Enigma': 'enigma.jpg',
+            'Greaser': 'greaser.jpg',
+            'QA Hotel': 'qahotel.jpg',
+            'The Magee': 'themagee.jpg',
+            'Indooroopilly Hotel': 'indooroopillyhotel.jpg',
+            'The Paddo': 'thepaddo.jpg',
+            "Lefty's Music Hall": 'leftysmusichall.jpg',
+            'The Caxton Hotel': 'thecaxtonhotel.jpg',
+            'Death and Taxes Brisbane': 'deathandtaxes.jpg',
+            'Cloudland': 'cloudland.jpg',
+            'The Wickham': 'thewickham.jpg',
+            'Summer House': 'summahouse.jpg',
+            'Empire Hotel': 'empirehotel.jpg',
+            "Pig 'N' Whistle": 'pignwhistle.jpg',
+            'Netherworld': 'netherworld.jpg',
+            'Darling & Co.': 'darling&co.jpg',
+            'The Brightside': 'thebrightside.jpg',
+            'Greens': 'greens.jpg',
+            "RG's": 'rgs.jpg',
+            'The Sound Garden': 'thesoundgarden.jpg',
+            'El Camino Cantina Brisbane': 'elcamino.jpg',
+            "Pig 'N' Whistle Riverside": 'pignwhistle.jpg',
+            "Pig 'N' Whistle West End": 'pignwhistle.jpg',
+            "Pig 'N' Whistle Indooroopilly": 'pignwhistle.jpg',
+            'The Prince Consort Hotel': 'princeconsort.jpg'
+        };
+        let venueIconURL = venueNameToFilename[venue.name]
+            ? `/uploads/${venueNameToFilename[venue.name]}`
+            : (iconImage?.url || null);
         return {
-            ...venue,
+            ...venueWithPopularTimes,
             currentStatus: latestSnapshot?.status || 'MODERATE',
             currentOccupancy: latestSnapshot?.occupancyCount || 0,
             occupancyPercentage: latestSnapshot?.occupancyPercentage || 0,
-            venueIcon: iconImage?.url || null,
+            venueIcon: venueIconURL,
             busySnapshots: undefined, // Remove from response
             venueImages: undefined // Remove from response
         };
-    });
+    }));
     res.json({
         venues: venuesWithStatus,
         metadata: {
@@ -134,10 +210,12 @@ router.get('/:id', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     if (!venue) {
         throw (0, errorHandler_1.createError)('Venue not found', 404);
     }
+    // Ensure venue has popular times
+    const venueWithPopularTimes = await ensurePopularTimes(venue);
     // Extract icon image
-    const iconImage = venue.venueImages?.find(img => img.imageType === 'ICON');
+    const iconImage = venueWithPopularTimes.venueImages?.find(img => img.imageType === 'ICON');
     const venueWithIcon = {
-        ...venue,
+        ...venueWithPopularTimes,
         venueIcon: iconImage?.url || null
     };
     res.json({ venue: venueWithIcon });
@@ -387,5 +465,113 @@ router.get('/:id/analytics/overview', (0, auth_1.requireRole)(['VENUE_MANAGER', 
         postsCreated: posts
     });
 }));
+// POST /venues/populate-popular-times - Populate all venues with popular times data
+router.post('/populate-popular-times', (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    console.log('🔄 Starting popular times population for all venues...');
+    const venues = await prisma.venue.findMany({
+        select: {
+            id: true,
+            name: true,
+            location: true,
+            popularTimes: true,
+            popularTimesUpdated: true
+        }
+    });
+    let updated = 0;
+    let skipped = 0;
+    let failed = 0;
+    for (const venue of venues) {
+        try {
+            // Skip if updated within last 7 days
+            if (venue.popularTimesUpdated) {
+                const daysSinceUpdate = (Date.now() - venue.popularTimesUpdated.getTime()) / (1000 * 60 * 60 * 24);
+                if (daysSinceUpdate < 7) {
+                    console.log(`⏭️  Skipping ${venue.name} - updated ${Math.floor(daysSinceUpdate)} days ago`);
+                    skipped++;
+                    continue;
+                }
+            }
+            console.log(`📡 Fetching popular times for ${venue.name}...`);
+            // Try SerpAPI first
+            const popularTimesData = await serpApiService.fetchPopularTimes(venue.name, venue.location);
+            if (popularTimesData && popularTimesData.popularTimes) {
+                await prisma.venue.update({
+                    where: { id: venue.id },
+                    data: {
+                        popularTimes: popularTimesData.popularTimes,
+                        popularTimesUpdated: new Date()
+                    }
+                });
+                console.log(`✅ Updated ${venue.name} with real popular times data`);
+                updated++;
+            }
+            else {
+                // Generate estimated data based on venue category
+                const venueWithCategory = await prisma.venue.findUnique({
+                    where: { id: venue.id },
+                    select: { category: true }
+                });
+                const estimatedData = serpApiService.generateEstimatedPopularTimes(venueWithCategory?.category || 'bar');
+                await prisma.venue.update({
+                    where: { id: venue.id },
+                    data: {
+                        popularTimes: estimatedData,
+                        popularTimesUpdated: new Date()
+                    }
+                });
+                console.log(`📊 Updated ${venue.name} with estimated data (real data unavailable)`);
+                updated++;
+            }
+            // Add delay to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        catch (error) {
+            console.error(`❌ Failed to update ${venue.name}:`, error);
+            failed++;
+        }
+    }
+    res.json({
+        message: 'Popular times population complete',
+        totalVenues: venues.length,
+        updated,
+        skipped,
+        failed
+    });
+}));
+// Helper function to check if popular times need refresh
+async function ensurePopularTimes(venue) {
+    // If no popular times or outdated (>7 days), fetch new data
+    const needsRefresh = !venue.popularTimes ||
+        !venue.popularTimesUpdated ||
+        (Date.now() - new Date(venue.popularTimesUpdated).getTime()) > (7 * 24 * 60 * 60 * 1000);
+    if (needsRefresh) {
+        try {
+            console.log(`🔄 Fetching popular times for ${venue.name}...`);
+            const popularTimesData = await serpApiService.fetchPopularTimes(venue.name, venue.location);
+            if (popularTimesData && popularTimesData.popularTimes) {
+                // Update in background
+                prisma.venue.update({
+                    where: { id: venue.id },
+                    data: {
+                        popularTimes: popularTimesData.popularTimes,
+                        popularTimesUpdated: new Date()
+                    }
+                }).catch(err => console.error('Failed to update popular times:', err));
+                venue.popularTimes = popularTimesData.popularTimes;
+            }
+            else {
+                // Use estimated data
+                const estimatedData = serpApiService.generateEstimatedPopularTimes(venue.category);
+                venue.popularTimes = estimatedData;
+            }
+        }
+        catch (error) {
+            console.error(`Failed to fetch popular times for ${venue.name}:`, error);
+            // Use estimated data as fallback
+            venue.popularTimes = serpApiService.generateEstimatedPopularTimes(venue.category);
+        }
+    }
+    return venue;
+}
 exports.default = router;
 //# sourceMappingURL=venues.js.map

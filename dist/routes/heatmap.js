@@ -43,7 +43,8 @@ async function getHeatMapVenues() {
     return venues.map(convertVenueToHeatMap);
 }
 // Route 1: GET /heatmap/tiles/:z/:x/:y.png - Get heat map tile
-router.get('/tiles/:z/:x/:y.png', auth_1.authMiddleware, async (req, res) => {
+// No auth required for tile access - tiles are public
+router.get('/tiles/:z/:x/:y.png', async (req, res) => {
     try {
         const z = parseInt(req.params.z);
         const x = parseInt(req.params.x);

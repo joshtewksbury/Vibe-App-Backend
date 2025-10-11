@@ -1,8 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import morgan from 'morgan';
 import { config } from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import * as Sentry from '@sentry/node';
 import { authMiddleware } from './middleware/auth';
 import { rateLimitMiddleware } from './middleware/rateLimiting';
 import { errorHandler } from './middleware/errorHandler';
@@ -16,6 +18,7 @@ import userRoutes from './routes/users';
 import feedRoutes from './routes/feed';
 import heatmapRoutes from './routes/heatmap';
 import imageRoutes from './routes/images';
+import imageProxyRoutes from './routes/imageProxy';
 import friendsRoutes from './routes/friends';
 import messagesRoutes from './routes/messages';
 
@@ -25,6 +28,19 @@ config();
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
+
+// Initialize Sentry for error tracking (production only)
+if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV,
+    tracesSampleRate: 1.0, // Capture 100% of transactions for performance monitoring
+    integrations: [
+      // Enable Express integration for automatic request tracing
+      Sentry.expressIntegration(),
+    ],
+  });
+}
 
 // Security middleware
 app.use(helmet());
@@ -40,31 +56,65 @@ app.use(cors(corsOptions));
 // Rate limiting
 app.use(rateLimitMiddleware);
 
+// HTTP Request Logging
+if (process.env.NODE_ENV === 'production') {
+  // Apache-style combined logs for production
+  app.use(morgan('combined'));
+} else {
+  // Colored concise logs for development
+  app.use(morgan('dev'));
+}
+
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Serve static files from Railway volume
+app.use('/uploads', express.static('/app/uploads'));
+
 // Audit logging
 app.use(auditLogger);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
+// Health check endpoint with database connectivity test
+app.get('/health', async (req, res) => {
+  try {
+    // Test database connection
+    await prisma.$queryRaw`SELECT 1`;
+
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: 'connected',
+      environment: process.env.NODE_ENV || 'development'
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(503).json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: 'disconnected',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
 });
 
 // API routes
 app.use('/auth', authRoutes);
 app.use('/venues', venueRoutes); // Venues endpoint now public (no auth required)
 app.use('/', venueImageRoutes); // Image routes include their own auth middleware
+app.use('/image-proxy', imageProxyRoutes); // Image proxy for external images (Instagram, etc)
 app.use('/users', userRoutes); // Users endpoint now public for search (individual routes can add auth as needed)
 app.use('/feed', authMiddleware, feedRoutes);
 app.use('/heatmap', heatmapRoutes); // Heat map routes include their own auth middleware
 app.use('/friends', friendsRoutes); // Friends routes include their own auth middleware
 app.use('/messages', messagesRoutes); // Messages routes include their own auth middleware
+
+// Sentry error handler must be registered before other error handlers
+if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
+  app.use(Sentry.expressErrorHandler());
+}
 
 // Error handling
 app.use(errorHandler);

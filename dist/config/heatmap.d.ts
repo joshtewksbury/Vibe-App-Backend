@@ -5,6 +5,7 @@ export declare const heatmapConfig: {
     minZoom: number;
     percentileClip: number;
     gamma: number;
+    gaussianBlurSigma: number;
     cacheTTL: number;
     tileUpdateInterval: number;
     maxVenuesPerTile: number;
