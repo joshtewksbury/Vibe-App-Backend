@@ -86,12 +86,88 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
     // Ensure venue has popular times (fetch if missing or outdated)
     const venueWithPopularTimes = await ensurePopularTimes(venue);
 
+    // Get icon URL from hosted images in /uploads
+    // Map venue names to their actual filenames (from upload_venue_icons.js)
+    const venueNameToFilename: { [key: string]: string } = {
+      'Hey Chica': 'heychica.jpg',
+      'Iris Rooftop': 'irisrooftop.jpg',
+      'The MET': 'themet.jpg',
+      'The Beat': 'thebeat.jpg',
+      'Honky Tonks': 'honkytonks.jpg',
+      'Black Bear Lodge': 'blackbearlodge.jpg',
+      'Su Casa': 'sucasa.jpg',
+      'The Boundary': 'theboundary.jpg',
+      'Archive': 'archive.jpg',
+      'Prohibition': 'prohibition.jpg',
+      'Birdees': 'birdees.jpg',
+      'Sixes and Sevens': 'sixesandsevens.jpg',
+      "Johnny Ringo's": 'johnnyringos.jpg',
+      'Maya Rooftop Bar': 'maya.jpg',
+      'Osbourne Hotel': 'osbournehotel.jpg',
+      'Regatta Hotel': 'regatta.jpg',
+      'Rics Bar': 'ricsbar.jpg',
+      'Royal Exchange Hotel': 'royalexchangehotel.jpg',
+      'Sixteen Antlers': 'sixteenantlers.jpg',
+      'Soko': 'soko.jpg',
+      'The Tax Office': 'taxoffice.jpg',
+      'Warehouse 25': 'warehouse25.jpg',
+      'Riverland Brisbane': 'riverland.jpg',
+      'Blackbird Brisbane': 'blackbird.jpg',
+      "Friday's Riverside Brisbane": 'fridays.jpg',
+      'Riverbar & Kitchen Brisbane': 'riverbarandkitchen.jpg',
+      'Bar Pacino Brisbane': 'barpacino.jpg',
+      'Hotel West End': 'hotelwestend.jpg',
+      'The Normanby Hotel': 'thenormanbyhotel.jpg',
+      'The Newmarket Hotel': 'newmarkethotel.jpg',
+      'Eclipse Nightclub': 'eclipse.jpg',
+      'Retros': 'retros.jpg',
+      'The Triffid': 'thetriffid.jpg',
+      'The Tivoli': 'thetivoli.jpg',
+      "Mr Percival's": 'mrpercivals.jpg',
+      'The Lobby Bar': 'lobbybar.jpg',
+      'Jubilee Hotel': 'jubileehotel.jpg',
+      'Alfred & Constance': 'alfredandconstance.jpg',
+      'The Star Brisbane': 'thestarbrisbane.jpg',
+      'Felons Brewing Co': 'felons.jpg',
+      'Pawn & Co Brisbane': 'pawn&co.jpg',
+      'Wonderland': 'wonderland.jpg',
+      'Enigma': 'enigma.jpg',
+      'Greaser': 'greaser.jpg',
+      'QA Hotel': 'qahotel.jpg',
+      'The Magee': 'themagee.jpg',
+      'Indooroopilly Hotel': 'indooroopillyhotel.jpg',
+      'The Paddo': 'thepaddo.jpg',
+      "Lefty's Music Hall": 'leftysmusichall.jpg',
+      'The Caxton Hotel': 'thecaxtonhotel.jpg',
+      'Death and Taxes Brisbane': 'deathandtaxes.jpg',
+      'Cloudland': 'cloudland.jpg',
+      'The Wickham': 'thewickham.jpg',
+      'Summer House': 'summahouse.jpg',
+      'Empire Hotel': 'empirehotel.jpg',
+      "Pig 'N' Whistle": 'pignwhistle.jpg',
+      'Netherworld': 'netherworld.jpg',
+      'Darling & Co.': 'darling&co.jpg',
+      'The Brightside': 'thebrightside.jpg',
+      'Greens': 'greens.jpg',
+      "RG's": 'rgs.jpg',
+      'The Sound Garden': 'thesoundgarden.jpg',
+      'El Camino Cantina Brisbane': 'elcamino.jpg',
+      "Pig 'N' Whistle Riverside": 'pignwhistle.jpg',
+      "Pig 'N' Whistle West End": 'pignwhistle.jpg',
+      "Pig 'N' Whistle Indooroopilly": 'pignwhistle.jpg',
+      'The Prince Consort Hotel': 'princeconsort.jpg'
+    };
+
+    let venueIconURL = venueNameToFilename[venue.name]
+      ? `/uploads/${venueNameToFilename[venue.name]}`
+      : (iconImage?.url || null);
+
     return {
       ...venueWithPopularTimes,
       currentStatus: latestSnapshot?.status || 'MODERATE',
       currentOccupancy: latestSnapshot?.occupancyCount || 0,
       occupancyPercentage: latestSnapshot?.occupancyPercentage || 0,
-      venueIcon: iconImage?.url || null,
+      venueIcon: venueIconURL,
       busySnapshots: undefined, // Remove from response
       venueImages: undefined // Remove from response
     };

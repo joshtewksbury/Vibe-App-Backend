@@ -81,6 +81,10 @@ class HeatMapTileService {
       buffer[i * 4 + 3] = color.a;
     }
 
+    // Apply Gaussian blur for smoother heat map appearance
+    // Sigma value controls blur strength - higher = more blur
+    const blurSigma = heatmapConfig.gaussianBlurSigma || 4;
+
     return await sharp(buffer, {
       raw: {
         width: size,
@@ -88,9 +92,12 @@ class HeatMapTileService {
         channels: 4
       }
     })
+    .blur(blurSigma) // Apply Gaussian blur
     .png({
-      compressionLevel: 6, // Balance between file size and speed
-      palette: false // Disable palette to maintain colors
+      compressionLevel: 3, // Lower compression for faster processing (was 6)
+      palette: false, // Disable palette to maintain colors
+      adaptiveFiltering: false, // Disable for speed
+      effort: 1 // Minimum effort for faster encoding (1-10 scale)
     })
     .toBuffer();
   }

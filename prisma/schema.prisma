@@ -84,7 +84,8 @@ model Venue {
   bookingURL       String?
   phoneNumber      String?
   images           String[]
-  venueIcon        String?          // Venue icon/logo image URL
+  venueIcon        String?          // Base64 venue icon (deprecated, use venueIconUrl)
+  venueIconUrl     String?          // Cloudinary URL for venue icon
   genderSplit      Json?            @map("gender_split") // Gender demographics {male: Int, female: Int}
   averageAge       Int?             @map("average_age") // Average age of venue goers
   placeId          String?          // Google Places ID

@@ -71,3 +71,8 @@ jspm_packages/
 
 # Prisma
 prisma/migrations/dev.db*
+
+# Database backups
+backups/
+*.sql
+*.sql.gz
