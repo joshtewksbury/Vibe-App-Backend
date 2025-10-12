@@ -158,9 +158,12 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
       'The Prince Consort Hotel': 'princeconsort.jpg'
     };
 
-    let venueIconURL = venueNameToFilename[venue.name]
-      ? `/uploads/${venueNameToFilename[venue.name]}`
-      : (iconImage?.url || null);
+    // Prioritize: 1) venueIconUrl (Cloudinary), 2) venueIcon (Instagram URLs), 3) local uploads, 4) VenueImage table
+    let venueIconURL = venueWithPopularTimes.venueIconUrl ||
+                       venueWithPopularTimes.venueIcon ||
+                       (venueNameToFilename[venue.name] ? `/uploads/${venueNameToFilename[venue.name]}` : null) ||
+                       iconImage?.url ||
+                       null;
 
     return {
       ...venueWithPopularTimes,
@@ -235,9 +238,15 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
   // Extract icon image
   const iconImage = venueWithPopularTimes.venueImages?.find(img => img.imageType === 'ICON');
 
+  // Prioritize: 1) venueIconUrl (Cloudinary), 2) venueIcon (Instagram URLs), 3) VenueImage table
+  const venueIconURL = venueWithPopularTimes.venueIconUrl ||
+                       venueWithPopularTimes.venueIcon ||
+                       iconImage?.url ||
+                       null;
+
   const venueWithIcon = {
     ...venueWithPopularTimes,
-    venueIcon: iconImage?.url || null
+    venueIcon: venueIconURL
   };
 
   res.json({ venue: venueWithIcon });
