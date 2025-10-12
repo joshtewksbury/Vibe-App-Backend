@@ -11,6 +11,7 @@ import {
 } from '../utils/validation';
 import { SerpAPIService } from '../services/serpApi';
 import { GooglePlacesService } from '../services/googlePlaces';
+import { calculateVenueStatus, getStatusColor } from '../utils/venueStatusColors';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -165,11 +166,18 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
                        iconImage?.url ||
                        null;
 
+    // Calculate status and color based on actual occupancy
+    const currentOcc = latestSnapshot?.occupancyCount || venue.currentOccupancy || 0;
+    const status = calculateVenueStatus(currentOcc, venue.capacity);
+    const statusColor = getStatusColor(status);
+
     return {
       ...venueWithPopularTimes,
-      currentStatus: latestSnapshot?.status || 'MODERATE',
-      currentOccupancy: latestSnapshot?.occupancyCount || 0,
-      occupancyPercentage: latestSnapshot?.occupancyPercentage || 0,
+      currentStatus: latestSnapshot?.status || status,
+      currentOccupancy: currentOcc,
+      occupancyPercentage: latestSnapshot?.occupancyPercentage || Math.round((currentOcc / venue.capacity) * 100),
+      statusColor: statusColor.hex,
+      statusColorRgb: statusColor.rgb,
       venueIcon: venueIconURL,
       busySnapshots: undefined, // Remove from response
       venueImages: undefined // Remove from response

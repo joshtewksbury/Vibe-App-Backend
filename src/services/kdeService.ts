@@ -10,15 +10,19 @@ class KDEService {
     const bandwidth = heatmapConfig.kdeBandwidth(zoom);
     let maxIntensity = 0;
 
-    // Sample key locations to find global maximum
-    const samplePoints = [
-      // Map venue coordinates
-      ...venues.map(v => [v.longitude, v.latitude]),
-      // Add strategic sampling points (can be customized for different cities)
-      [153.0251, -27.4698], // Brisbane center
-      [153.0314, -27.4566], // Fortitude Valley
-      [153.0357, -27.4612], // Howard Smith Wharves
-    ];
+    // Filter out venues with zero occupancy
+    const activeVenues = venues.filter(v => v.currentOccupancy > 0);
+
+    // If no venues are active, set max intensity to a small value to avoid division by zero
+    if (activeVenues.length === 0) {
+      this.globalMaxIntensity = 0.001;
+      this.lastVenueUpdate = new Date();
+      return;
+    }
+
+    // Sample at actual venue locations to find maximum intensity
+    // This ensures the heatmap reflects actual occupancy patterns
+    const samplePoints = activeVenues.map(v => [v.longitude, v.latitude] as [number, number]);
 
     for (const [lng, lat] of samplePoints) {
       const [mx, my] = WebMercator.lngLatToMeters(lng, lat);
@@ -28,7 +32,8 @@ class KDEService {
       }
     }
 
-    this.globalMaxIntensity = maxIntensity;
+    // Ensure we have a minimum threshold to avoid overly sensitive heatmaps
+    this.globalMaxIntensity = Math.max(maxIntensity, 0.001);
     this.lastVenueUpdate = new Date();
   }
 
