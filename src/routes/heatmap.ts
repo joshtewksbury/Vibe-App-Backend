@@ -34,15 +34,49 @@ async function getHeatMapVenues(): Promise<HeatMapVenue[]> {
       longitude: true,
       capacity: true,
       currentOccupancy: true,
-      rating: true
+      rating: true,
+      busyTimes: true
     },
     where: {
-      capacity: { gt: 0 }, // Only venues with known capacity
-      currentOccupancy: { gte: 0 } // Only venues with occupancy data
+      capacity: { gt: 0 } // Only venues with known capacity
     }
   });
 
-  return venues.map(convertVenueToHeatMap);
+  // Get current hour for time-aware occupancy calculation
+  const currentHour = new Date().getHours();
+
+  return venues.map(venue => {
+    let occupancy = venue.currentOccupancy;
+
+    // If venue has no real-time occupancy data, calculate from busyTimes
+    if (occupancy === 0 && venue.busyTimes && venue.busyTimes.length > 0) {
+      const busyTimesArray = Array.isArray(venue.busyTimes)
+        ? venue.busyTimes
+        : JSON.parse(JSON.stringify(venue.busyTimes));
+
+      // Find current hour's busyness percentage
+      const currentHourData = busyTimesArray.find((time: any) => {
+        const hour = parseInt(time.hour.split(':')[0]);
+        return hour === currentHour;
+      });
+
+      if (currentHourData && currentHourData.percentage) {
+        // Convert percentage to occupancy (percentage of capacity)
+        occupancy = Math.round((currentHourData.percentage / 100) * venue.capacity);
+      }
+    }
+
+    return {
+      id: venue.id,
+      name: venue.name,
+      latitude: venue.latitude,
+      longitude: venue.longitude,
+      capacity: venue.capacity,
+      currentOccupancy: occupancy,
+      rating: venue.rating,
+      currentEvents: []
+    };
+  });
 }
 
 // Route 1: GET /heatmap/tiles/:z/:x/:y.png - Get heat map tile
