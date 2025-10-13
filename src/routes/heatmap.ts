@@ -35,7 +35,7 @@ async function getHeatMapVenues(): Promise<HeatMapVenue[]> {
       capacity: true,
       currentOccupancy: true,
       rating: true,
-      busyTimes: true
+      popularTimes: true
     },
     where: {
       capacity: { gt: 0 } // Only venues with known capacity
@@ -48,21 +48,43 @@ async function getHeatMapVenues(): Promise<HeatMapVenue[]> {
   return venues.map(venue => {
     let occupancy = venue.currentOccupancy;
 
-    // If venue has no real-time occupancy data, calculate from busyTimes
-    if (occupancy === 0 && venue.busyTimes && venue.busyTimes.length > 0) {
-      const busyTimesArray = Array.isArray(venue.busyTimes)
-        ? venue.busyTimes
-        : JSON.parse(JSON.stringify(venue.busyTimes));
+    // If venue has no real-time occupancy data, calculate from popularTimes
+    if (occupancy === 0 && venue.popularTimes) {
+      try {
+        const popularTimesData = venue.popularTimes as any;
 
-      // Find current hour's busyness percentage
-      const currentHourData = busyTimesArray.find((time: any) => {
-        const hour = parseInt(time.hour.split(':')[0]);
-        return hour === currentHour;
-      });
+        // popularTimes format: { data: [{ name: "Monday", data: [...] }, ...] }
+        // or could be array of { hour: "HH:mm", percentage: number }
+        let hourlyData: any[] = [];
 
-      if (currentHourData && currentHourData.percentage) {
-        // Convert percentage to occupancy (percentage of capacity)
-        occupancy = Math.round((currentHourData.percentage / 100) * venue.capacity);
+        if (Array.isArray(popularTimesData)) {
+          // Direct array of hourly data
+          hourlyData = popularTimesData;
+        } else if (popularTimesData.data && Array.isArray(popularTimesData.data)) {
+          // Nested format - get today's data
+          const today = new Date().getDay(); // 0 = Sunday
+          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          const todayData = popularTimesData.data.find((d: any) => d.name === dayNames[today]);
+          if (todayData && todayData.data) {
+            hourlyData = todayData.data;
+          }
+        }
+
+        // Find current hour's busyness percentage
+        const currentHourData = hourlyData.find((time: any) => {
+          if (time.hour) {
+            const hour = parseInt(time.hour.split(':')[0]);
+            return hour === currentHour;
+          }
+          return false;
+        });
+
+        if (currentHourData && currentHourData.percentage) {
+          // Convert percentage to occupancy (percentage of capacity)
+          occupancy = Math.round((currentHourData.percentage / 100) * venue.capacity);
+        }
+      } catch (error) {
+        console.error(`Error parsing popularTimes for venue ${venue.id}:`, error);
       }
     }
 
