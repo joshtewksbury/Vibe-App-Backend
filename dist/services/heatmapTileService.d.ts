@@ -1,5 +1,6 @@
 import { HeatMapVenue, GridResponse } from '../types/heatmap';
 declare class HeatMapTileService {
+    private getVenueHash;
     getTile(z: number, x: number, y: number, venues: HeatMapVenue[]): Promise<Buffer>;
     getGrid(z: number, x: number, y: number, venues: HeatMapVenue[]): Promise<GridResponse>;
     private renderPNG;

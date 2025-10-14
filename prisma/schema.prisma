@@ -418,3 +418,23 @@ enum MessageType {
   IMAGE
   VIDEO
 }
+
+// Heat map tile caching for fast performance
+model HeatMapTile {
+  id         String   @id @default(cuid())
+  z          Int      // Zoom level
+  x          Int      // Tile X coordinate
+  y          Int      // Tile Y coordinate
+  tileData   Bytes    // PNG tile data
+  venueHash  String   // Hash of venue occupancy data used to generate tile
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime // When this tile expires
+  hitCount   Int      @default(0) // Track tile popularity
+  lastHitAt  DateTime @default(now())
+
+  @@unique([z, x, y])
+  @@map("heatmap_tiles")
+  @@index([z])
+  @@index([expiresAt])
+  @@index([venueHash])
+}

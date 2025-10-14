@@ -24,8 +24,19 @@ function convertVenueToHeatMap(venue: any): HeatMapVenue {
   };
 }
 
+// Cache venues in memory for 30 seconds to avoid DB queries
+let venueCache: { venues: HeatMapVenue[]; timestamp: number } | null = null;
+const VENUE_CACHE_TTL = 30000; // 30 seconds
+
 // Get venues for heat map processing
 async function getHeatMapVenues(): Promise<HeatMapVenue[]> {
+  const now = Date.now();
+
+  // Return cached venues if still fresh
+  if (venueCache && now - venueCache.timestamp < VENUE_CACHE_TTL) {
+    return venueCache.venues;
+  }
+
   const venues = await prisma.venue.findMany({
     select: {
       id: true,
@@ -42,7 +53,7 @@ async function getHeatMapVenues(): Promise<HeatMapVenue[]> {
     }
   });
 
-  return venues.map(venue => ({
+  const heatMapVenues = venues.map(venue => ({
     id: venue.id,
     name: venue.name,
     latitude: venue.latitude,
@@ -52,6 +63,14 @@ async function getHeatMapVenues(): Promise<HeatMapVenue[]> {
     rating: venue.rating,
     currentEvents: []
   }));
+
+  // Update cache
+  venueCache = {
+    venues: heatMapVenues,
+    timestamp: now
+  };
+
+  return heatMapVenues;
 }
 
 // Route 1: GET /heatmap/tiles/:z/:x/:y.png - Get heat map tile
@@ -84,9 +103,12 @@ router.get('/tiles/:z/:x/:y.png', async (req, res) => {
 
     res.set({
       'Content-Type': 'image/png',
-      'Cache-Control': `public, max-age=${heatmapConfig.cacheTTL}`,
+      // Aggressive caching for CDN/browsers - tiles update every 5 min
+      'Cache-Control': `public, max-age=300, s-maxage=300, stale-while-revalidate=60`,
       'X-Tile-Coords': `${z}/${x}/${y}`,
-      'X-Venue-Count': venues.length.toString()
+      'X-Venue-Count': venues.length.toString(),
+      'Vary': 'Accept-Encoding', // Enable compression
+      'X-Content-Type-Options': 'nosniff'
     });
 
     res.send(tile);

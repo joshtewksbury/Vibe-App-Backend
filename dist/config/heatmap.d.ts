@@ -9,6 +9,7 @@ export declare const heatmapConfig: {
     cacheTTL: number;
     tileUpdateInterval: number;
     maxVenuesPerTile: number;
+    dbCacheCleanupInterval: number;
     defaultBounds: {
         north: number;
         south: number;
