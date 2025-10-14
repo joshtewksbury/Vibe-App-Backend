@@ -10,6 +10,7 @@ const auth_1 = require("../middleware/auth");
 const validation_1 = require("../utils/validation");
 const serpApi_1 = require("../services/serpApi");
 const googlePlaces_1 = require("../services/googlePlaces");
+const venueStatusColors_1 = require("../utils/venueStatusColors");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
 const serpApiService = new serpApi_1.SerpAPIService();
@@ -145,14 +146,23 @@ router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
             "Pig 'N' Whistle Indooroopilly": 'pignwhistle.jpg',
             'The Prince Consort Hotel': 'princeconsort.jpg'
         };
-        let venueIconURL = venueNameToFilename[venue.name]
-            ? `/uploads/${venueNameToFilename[venue.name]}`
-            : (iconImage?.url || null);
+        // Prioritize: 1) venueIconUrl (Cloudinary), 2) venueIcon (Instagram URLs), 3) local uploads, 4) VenueImage table
+        let venueIconURL = venueWithPopularTimes.venueIconUrl ||
+            venueWithPopularTimes.venueIcon ||
+            (venueNameToFilename[venue.name] ? `/uploads/${venueNameToFilename[venue.name]}` : null) ||
+            iconImage?.url ||
+            null;
+        // Calculate status and color based on actual occupancy
+        const currentOcc = latestSnapshot?.occupancyCount || venue.currentOccupancy || 0;
+        const status = (0, venueStatusColors_1.calculateVenueStatus)(currentOcc, venue.capacity);
+        const statusColor = (0, venueStatusColors_1.getStatusColor)(status);
         return {
             ...venueWithPopularTimes,
-            currentStatus: latestSnapshot?.status || 'MODERATE',
-            currentOccupancy: latestSnapshot?.occupancyCount || 0,
-            occupancyPercentage: latestSnapshot?.occupancyPercentage || 0,
+            currentStatus: latestSnapshot?.status || status,
+            currentOccupancy: currentOcc,
+            occupancyPercentage: latestSnapshot?.occupancyPercentage || Math.round((currentOcc / venue.capacity) * 100),
+            statusColor: statusColor.hex,
+            statusColorRgb: statusColor.rgb,
             venueIcon: venueIconURL,
             busySnapshots: undefined, // Remove from response
             venueImages: undefined // Remove from response
@@ -214,9 +224,14 @@ router.get('/:id', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const venueWithPopularTimes = await ensurePopularTimes(venue);
     // Extract icon image
     const iconImage = venueWithPopularTimes.venueImages?.find(img => img.imageType === 'ICON');
+    // Prioritize: 1) venueIconUrl (Cloudinary), 2) venueIcon (Instagram URLs), 3) VenueImage table
+    const venueIconURL = venueWithPopularTimes.venueIconUrl ||
+        venueWithPopularTimes.venueIcon ||
+        iconImage?.url ||
+        null;
     const venueWithIcon = {
         ...venueWithPopularTimes,
-        venueIcon: iconImage?.url || null
+        venueIcon: venueIconURL
     };
     res.json({ venue: venueWithIcon });
 }));

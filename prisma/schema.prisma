@@ -321,6 +321,7 @@ model Conversation {
   id        String   @id @default(cuid())
   type      ConversationType @default(DIRECT)
   name      String?  // For group chats
+  sharedEncryptionKey String? // Base64-encoded shared encryption key for E2EE
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

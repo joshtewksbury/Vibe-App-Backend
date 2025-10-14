@@ -204,7 +204,7 @@ router.get('/conversations/:conversationId', authMiddleware, async (req: AuthReq
 router.post('/conversations', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
-    const { friendId, type = 'DIRECT' } = req.body;
+    const { friendId, type = 'DIRECT', sharedEncryptionKey } = req.body;
 
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -271,10 +271,11 @@ router.post('/conversations', authMiddleware, async (req: AuthRequest, res: Resp
       return res.json({ conversation: existingParticipation.conversation });
     }
 
-    // Create new conversation
+    // Create new conversation with shared encryption key
     const conversation = await prisma.conversation.create({
       data: {
         type: type as 'DIRECT' | 'GROUP',
+        sharedEncryptionKey: sharedEncryptionKey || null,
         participants: {
           create: [
             { userId: userId },

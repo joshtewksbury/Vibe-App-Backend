@@ -1,1 +1,1 @@
-{"version":3,"file":"colormap.d.ts","sourceRoot":"","sources":["../../src/utils/colormap.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,kBAAkB,CAAC;AAEzC,qBAAa,QAAQ;IACnB,OAAO,CAAC,MAAM,CAAC,QAAQ,CAAC,WAAW,CAOjC;IAEF,MAAM,CAAC,QAAQ,CAAC,SAAS,EAAE,MAAM,GAAG,KAAK;CAoB1C"}
+{"version":3,"file":"colormap.d.ts","sourceRoot":"","sources":["../../src/utils/colormap.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,kBAAkB,CAAC;AAEzC,qBAAa,QAAQ;IAOnB,OAAO,CAAC,MAAM,CAAC,QAAQ,CAAC,WAAW,CAQjC;IAEF,MAAM,CAAC,QAAQ,CAAC,SAAS,EAAE,MAAM,GAAG,KAAK;CAoB1C"}
