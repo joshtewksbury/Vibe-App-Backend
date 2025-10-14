@@ -4,9 +4,11 @@ exports.heatmapConfig = void 0;
 exports.heatmapConfig = {
     // KDE parameters by zoom level
     kdeBandwidth: (zoom) => {
-        // σ at z=16: 150m, scale as σ ∝ 2^(16−z)
-        const base = 150;
-        return base * Math.pow(2, 16 - zoom);
+        // Increased base bandwidth for more visible heat at all zoom levels
+        // σ at z=14: 300m (doubled from 150m), scale more gradually
+        const base = 300;
+        // Use gentler scaling: σ ∝ 2^(14−z) instead of 2^(16−z)
+        return base * Math.pow(2, 14 - zoom);
     },
     tileSize: 256,
     maxZoom: 18,
@@ -14,8 +16,8 @@ exports.heatmapConfig = {
     // Normalization parameters
     percentileClip: 0.95,
     gamma: 0.8,
-    // Gaussian blur parameters - reduced for better performance
-    gaussianBlurSigma: 4, // Reduced from 8 for faster rendering
+    // Gaussian blur parameters - increased for better visibility across zoom levels
+    gaussianBlurSigma: 8, // Increased from 4 for more visible heat blooms
     // Cache settings - longer cache for better performance
     cacheTTL: parseInt(process.env.HEATMAP_CACHE_TTL || '3600'), // 1 hour (was 5 min)
     tileUpdateInterval: parseInt(process.env.HEATMAP_UPDATE_INTERVAL || '300'), // 5 minutes
