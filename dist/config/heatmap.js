@@ -11,7 +11,7 @@ exports.heatmapConfig = {
         return base * Math.pow(2, 14 - zoom);
     },
     tileSize: 256,
-    maxZoom: 18,
+    maxZoom: 16, // Limit to 16 to prevent overwhelming tile requests
     minZoom: 11,
     // Normalization parameters
     percentileClip: 0.95,
