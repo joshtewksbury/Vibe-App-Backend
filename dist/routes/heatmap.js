@@ -33,65 +33,23 @@ async function getHeatMapVenues() {
             longitude: true,
             capacity: true,
             currentOccupancy: true,
-            rating: true,
-            popularTimes: true
+            rating: true
         },
         where: {
-            capacity: { gt: 0 } // Only venues with known capacity
+            capacity: { gt: 0 }, // Only venues with known capacity
+            currentOccupancy: { gt: 0 } // Only venues with occupancy > 0
         }
     });
-    // Get current hour for time-aware occupancy calculation
-    const currentHour = new Date().getHours();
-    return venues.map(venue => {
-        let occupancy = venue.currentOccupancy;
-        // If venue has no real-time occupancy data, calculate from popularTimes
-        if (occupancy === 0 && venue.popularTimes) {
-            try {
-                const popularTimesData = venue.popularTimes;
-                // popularTimes format: { data: [{ name: "Monday", data: [...] }, ...] }
-                // or could be array of { hour: "HH:mm", percentage: number }
-                let hourlyData = [];
-                if (Array.isArray(popularTimesData)) {
-                    // Direct array of hourly data
-                    hourlyData = popularTimesData;
-                }
-                else if (popularTimesData.data && Array.isArray(popularTimesData.data)) {
-                    // Nested format - get today's data
-                    const today = new Date().getDay(); // 0 = Sunday
-                    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                    const todayData = popularTimesData.data.find((d) => d.name === dayNames[today]);
-                    if (todayData && todayData.data) {
-                        hourlyData = todayData.data;
-                    }
-                }
-                // Find current hour's busyness percentage
-                const currentHourData = hourlyData.find((time) => {
-                    if (time.hour) {
-                        const hour = parseInt(time.hour.split(':')[0]);
-                        return hour === currentHour;
-                    }
-                    return false;
-                });
-                if (currentHourData && currentHourData.percentage) {
-                    // Convert percentage to occupancy (percentage of capacity)
-                    occupancy = Math.round((currentHourData.percentage / 100) * venue.capacity);
-                }
-            }
-            catch (error) {
-                console.error(`Error parsing popularTimes for venue ${venue.id}:`, error);
-            }
-        }
-        return {
-            id: venue.id,
-            name: venue.name,
-            latitude: venue.latitude,
-            longitude: venue.longitude,
-            capacity: venue.capacity,
-            currentOccupancy: occupancy,
-            rating: venue.rating,
-            currentEvents: []
-        };
-    });
+    return venues.map(venue => ({
+        id: venue.id,
+        name: venue.name,
+        latitude: venue.latitude,
+        longitude: venue.longitude,
+        capacity: venue.capacity,
+        currentOccupancy: venue.currentOccupancy,
+        rating: venue.rating,
+        currentEvents: []
+    }));
 }
 // Route 1: GET /heatmap/tiles/:z/:x/:y.png - Get heat map tile
 // No auth required for tile access - tiles are public
