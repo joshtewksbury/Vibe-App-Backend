@@ -9,6 +9,7 @@ import { authMiddleware } from './middleware/auth';
 import { rateLimitMiddleware } from './middleware/rateLimiting';
 import { errorHandler } from './middleware/errorHandler';
 import { auditLogger } from './middleware/auditLogger';
+import { tilePrecomputeService } from './services/tilePrecomputeService';
 
 // Route imports
 import authRoutes from './routes/auth';
@@ -130,12 +131,14 @@ app.use((req, res) => {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('Received SIGINT. Graceful shutdown...');
+  tilePrecomputeService.stopBackgroundRefresh();
   await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('Received SIGTERM. Graceful shutdown...');
+  tilePrecomputeService.stopBackgroundRefresh();
   await prisma.$disconnect();
   process.exit(0);
 });
@@ -145,6 +148,10 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+
+  // Start background tile precomputation and refresh
+  console.log('🔥 Starting heat map tile precomputation service...');
+  tilePrecomputeService.startBackgroundRefresh();
 });
 
 export { app, prisma };
