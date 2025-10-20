@@ -9,7 +9,7 @@ export const heatmapConfig = {
   },
 
   tileSize: 256,
-  maxZoom: 16, // Limit to 16 to prevent overwhelming tile requests
+  maxZoom: 20, // Extended to support all zoom levels for better detail
   minZoom: 11,
 
   // Normalization parameters
