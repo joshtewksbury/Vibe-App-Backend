@@ -24,9 +24,9 @@ function convertVenueToHeatMap(venue: any): HeatMapVenue {
   };
 }
 
-// Cache venues in memory for 30 seconds to avoid DB queries
+// Cache venues in memory for 10 seconds to allow faster updates
 let venueCache: { venues: HeatMapVenue[]; timestamp: number } | null = null;
-const VENUE_CACHE_TTL = 30000; // 30 seconds
+const VENUE_CACHE_TTL = 10000; // 10 seconds - faster updates for real-time changes
 
 // Get venues for heat map processing
 async function getHeatMapVenues(): Promise<HeatMapVenue[]> {
@@ -103,8 +103,8 @@ router.get('/tiles/:z/:x/:y.png', async (req, res) => {
 
     res.set({
       'Content-Type': 'image/png',
-      // Aggressive caching for CDN/browsers - tiles update every 5 min
-      'Cache-Control': `public, max-age=300, s-maxage=300, stale-while-revalidate=60`,
+      // Short cache for real-time updates - tiles update every 1 min
+      'Cache-Control': `public, max-age=60, s-maxage=60, stale-while-revalidate=30`,
       'X-Tile-Coords': `${z}/${x}/${y}`,
       'X-Venue-Count': venues.length.toString(),
       'Vary': 'Accept-Encoding', // Enable compression
