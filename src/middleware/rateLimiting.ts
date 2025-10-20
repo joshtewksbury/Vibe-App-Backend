@@ -31,6 +31,11 @@ export const rateLimitMiddleware = (req: Request, res: Response, next: NextFunct
 
   const key = getClientKey(req);
 
+  // Exempt heatmap tile requests from rate limiting - tiles are cached and need rapid loading
+  if (req.path.startsWith('/heatmap/tiles/')) {
+    return next();
+  }
+
   // Apply different rate limits based on the endpoint
   if (req.path.startsWith('/auth/signin') || req.path.startsWith('/auth/signout')) {
     authLimiter.consume(key)
