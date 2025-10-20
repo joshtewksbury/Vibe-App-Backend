@@ -11,16 +11,16 @@ exports.heatmapConfig = {
         return base * Math.pow(2, 14 - zoom);
     },
     tileSize: 256,
-    maxZoom: 16, // Limit to 16 to prevent overwhelming tile requests
+    maxZoom: 20, // Extended to support all zoom levels for better detail
     minZoom: 11,
     // Normalization parameters
     percentileClip: 0.95,
     gamma: 0.8,
     // Gaussian blur parameters - increased for better visibility across zoom levels
     gaussianBlurSigma: 8, // Increased from 4 for more visible heat blooms
-    // Cache settings - balanced for scalability and real-time updates
-    cacheTTL: parseInt(process.env.HEATMAP_CACHE_TTL || '60'), // 1 minute for real-time updates
-    tileUpdateInterval: parseInt(process.env.HEATMAP_UPDATE_INTERVAL || '60'), // 1 minute
+    // Cache settings - aggressive caching for better performance
+    cacheTTL: parseInt(process.env.HEATMAP_CACHE_TTL || '900'), // 15 minutes (900 seconds)
+    tileUpdateInterval: parseInt(process.env.HEATMAP_UPDATE_INTERVAL || '900'), // 15 minutes
     // Performance settings
     maxVenuesPerTile: 1000, // Limit venues processed per tile
     // Database cache cleanup interval

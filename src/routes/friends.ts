@@ -83,7 +83,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 
 /**
  * GET /friends/requests
- * Get pending friend requests
+ * Get pending friend requests (both incoming and outgoing)
  */
 router.get('/requests', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
@@ -93,14 +93,27 @@ router.get('/requests', authMiddleware, async (req: AuthRequest, res: Response) 
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Get pending requests where user is the receiver
+    // Get all pending requests where user is either initiator or receiver
     const requests = await prisma.friendship.findMany({
       where: {
-        receiverId: userId,
-        status: 'PENDING'
+        OR: [
+          { receiverId: userId, status: 'PENDING' },
+          { initiatorId: userId, status: 'PENDING' }
+        ]
       },
       include: {
         initiator: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            profileImage: true,
+            location: true,
+            lastActiveAt: true
+          }
+        },
+        receiver: {
           select: {
             id: true,
             email: true,

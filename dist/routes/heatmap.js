@@ -90,8 +90,8 @@ router.get('/tiles/:z/:x/:y.png', async (req, res) => {
         const tile = await heatmapTileService_1.heatmapTileService.getTile(z, x, y, venues);
         res.set({
             'Content-Type': 'image/png',
-            // Short cache for real-time updates - tiles update every 1 min
-            'Cache-Control': `public, max-age=60, s-maxage=60, stale-while-revalidate=30`,
+            // Aggressive caching - tiles update every 15 min (900 seconds)
+            'Cache-Control': `public, max-age=${heatmap_1.heatmapConfig.cacheTTL}, s-maxage=${heatmap_1.heatmapConfig.cacheTTL}, stale-while-revalidate=300`,
             'X-Tile-Coords': `${z}/${x}/${y}`,
             'X-Venue-Count': venues.length.toString(),
             'Vary': 'Accept-Encoding', // Enable compression
