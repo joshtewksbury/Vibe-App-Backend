@@ -122,21 +122,54 @@ model BusySnapshot {
 }
 
 model Post {
-  id        String   @id @default(cuid())
-  venueId   String
-  authorId  String
-  content   String
-  imageUrl  String?
-  tags      String[]
-  likes     Int      @default(0)
-  comments  Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String     @id @default(cuid())
+  venueId    String?    // Optional - can be null for user posts
+  authorId   String
+  authorType AuthorType @default(USER)
 
-  venue  Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
-  author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  // Post content
+  postType   PostType   @default(GENERAL)
+  postStyle  PostStyle  @default(STANDARD)
+  title      String
+  content    String
+
+  // Media
+  mediaUrl   String?    // Cloudinary URL for images/videos
+  mediaType  MediaType?
+  imageLayout ImageLayoutType @default(FULL_WIDTH)
+
+  // Event/Deal specific fields
+  eventId    String?
+  dealId     String?
+  startTime  DateTime?
+  endTime    DateTime?
+  originalPrice String?
+  discountPrice String?
+
+  // Engagement
+  likes      Int      @default(0)
+  comments   Int      @default(0)
+  views      Int      @default(0)
+
+  // Flags
+  isActive   Boolean  @default(true)
+  isPinned   Boolean  @default(false)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  venue  Venue? @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  postLikes    PostLike[]
+  postComments PostComment[]
 
   @@map("posts")
+  @@index([venueId])
+  @@index([authorId])
+  @@index([postType])
+  @@index([createdAt])
+  @@index([isActive])
 }
 
 model Deal {
@@ -182,19 +215,80 @@ model Event {
 }
 
 model Story {
-  id         String    @id @default(cuid())
-  venueId    String
-  authorId   String?   // Nullable for venue-posted stories
-  mediaUrl   String
-  mediaType  MediaType
-  caption    String?
-  views      Int       @default(0)
-  expiresAt  DateTime
-  createdAt  DateTime  @default(now())
+  id         String     @id @default(cuid())
+  venueId    String?    // Optional - can be null for user stories
+  authorId   String
+  authorType AuthorType @default(USER)
 
-  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  // Media
+  mediaUrl   String     // Cloudinary URL
+  mediaType  MediaType
+  thumbnailUrl String?  // Thumbnail for videos
+
+  // Content
+  caption    String?
+  location   String?
+
+  // Engagement
+  views      Int        @default(0)
+
+  // Lifecycle
+  expiresAt  DateTime   // Stories expire after 24 hours
+  createdAt  DateTime   @default(now())
+  isActive   Boolean    @default(true)
+
+  venue      Venue?     @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  storyViews StoryView[]
 
   @@map("stories")
+  @@index([venueId])
+  @@index([authorId])
+  @@index([expiresAt])
+  @@index([createdAt])
+  @@index([isActive])
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@map("post_likes")
+  @@index([postId])
+  @@index([userId])
+}
+
+model PostComment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("post_comments")
+  @@index([postId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model StoryView {
+  id        String   @id @default(cuid())
+  storyId   String
+  userId    String?  // Nullable for anonymous views
+  createdAt DateTime @default(now())
+
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@map("story_views")
+  @@index([storyId])
+  @@index([userId])
 }
 
 model AuditLog {
@@ -289,6 +383,35 @@ enum VenueImageType {
   DRINKS
   ATMOSPHERE
   EVENTS
+}
+
+enum AuthorType {
+  USER
+  VENUE
+}
+
+enum PostType {
+  EVENT
+  DEAL
+  SPORTS
+  ANNOUNCEMENT
+  REVIEW
+  PHOTO
+  GENERAL
+}
+
+enum PostStyle {
+  BANNER      // Large banner with overlay text
+  INFO        // Square image with text beside it
+  STANDARD    // Standard feed post
+}
+
+enum ImageLayoutType {
+  FULL_WIDTH
+  HALF_WIDTH
+  SQUARE
+  BANNER
+  INFO_SQUARE
 }
 
 // MARK: - Friends & Messaging Models

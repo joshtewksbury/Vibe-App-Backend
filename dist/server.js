@@ -60,6 +60,8 @@ const images_1 = __importDefault(require("./routes/images"));
 const imageProxy_1 = __importDefault(require("./routes/imageProxy"));
 const friends_1 = __importDefault(require("./routes/friends"));
 const messages_1 = __importDefault(require("./routes/messages"));
+const posts_1 = __importDefault(require("./routes/posts"));
+const stories_1 = __importDefault(require("./routes/stories"));
 // Load environment variables
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
@@ -140,6 +142,8 @@ app.use('/feed', auth_1.authMiddleware, feed_1.default);
 app.use('/heatmap', heatmap_1.default); // Heat map routes include their own auth middleware
 app.use('/friends', friends_1.default); // Friends routes include their own auth middleware
 app.use('/messages', messages_1.default); // Messages routes include their own auth middleware
+app.use('/posts', posts_1.default); // Posts routes include their own auth middleware
+app.use('/stories', stories_1.default); // Stories routes include their own auth middleware
 // Sentry error handler must be registered before other error handlers
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
     app.use(Sentry.expressErrorHandler());

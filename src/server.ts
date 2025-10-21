@@ -22,6 +22,8 @@ import imageRoutes from './routes/images';
 import imageProxyRoutes from './routes/imageProxy';
 import friendsRoutes from './routes/friends';
 import messagesRoutes from './routes/messages';
+import postsRoutes from './routes/posts';
+import storiesRoutes from './routes/stories';
 
 // Load environment variables
 config();
@@ -111,6 +113,8 @@ app.use('/feed', authMiddleware, feedRoutes);
 app.use('/heatmap', heatmapRoutes); // Heat map routes include their own auth middleware
 app.use('/friends', friendsRoutes); // Friends routes include their own auth middleware
 app.use('/messages', messagesRoutes); // Messages routes include their own auth middleware
+app.use('/posts', postsRoutes); // Posts routes include their own auth middleware
+app.use('/stories', storiesRoutes); // Stories routes include their own auth middleware
 
 // Sentry error handler must be registered before other error handlers
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {

@@ -44,16 +44,17 @@ router.get('/', asyncHandler(async (req: AuthenticatedRequest, res) => {
     feedItems.push(...posts.map(post => ({
       id: post.id,
       type: 'post',
+      title: post.title,
       content: post.content,
-      imageUrl: post.imageUrl,
+      mediaUrl: post.mediaUrl,
       venueId: post.venueId,
-      venueName: post.venue.name,
-      venueLocation: post.venue.location,
-      venueImages: post.venue.images,
+      venueName: post.venue?.name,
+      venueLocation: post.venue?.location,
+      venueImages: post.venue?.images || [],
       author: post.author,
       likes: post.likes,
       comments: post.comments,
-      tags: post.tags,
+      postType: post.postType,
       timestamp: post.createdAt
     })));
   }
@@ -208,13 +209,14 @@ router.get('/trending', asyncHandler(async (req: AuthenticatedRequest, res) => {
     trendingPosts: trendingPosts.map(post => ({
       id: post.id,
       type: 'post',
+      title: post.title,
       content: post.content,
-      imageUrl: post.imageUrl,
+      mediaUrl: post.mediaUrl,
       venue: post.venue,
       author: post.author,
       likes: post.likes,
       comments: post.comments,
-      tags: post.tags,
+      postType: post.postType,
       timestamp: post.createdAt
     })),
     popularVenues: popularVenues.map(venue => ({
