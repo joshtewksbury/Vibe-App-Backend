@@ -185,8 +185,16 @@ router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest
 
     res.status(201).json({ post });
   } catch (error) {
-    console.error('Error creating post:', error);
-    res.status(500).json({ error: 'Failed to create post' });
+    console.error('❌ Error creating post:', error);
+    console.error('❌ Error details:', JSON.stringify(error, null, 2));
+    if (error instanceof Error) {
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+    }
+    res.status(500).json({
+      error: 'Failed to create post',
+      details: error instanceof Error ? error.message : String(error)
+    });
   }
 });
 
