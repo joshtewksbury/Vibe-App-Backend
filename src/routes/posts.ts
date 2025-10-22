@@ -85,9 +85,19 @@ router.get('/', async (req: Request, res: Response) => {
  */
 router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest, res: Response) => {
   try {
+    console.log('📝 POST /posts - Creating new post');
+    console.log('📝 User ID:', req.user?.userId);
+    console.log('📝 Request body:', JSON.stringify(req.body, null, 2));
+    console.log('📝 File present:', !!req.file);
+    if (req.file) {
+      console.log('📝 File mimetype:', req.file.mimetype);
+      console.log('📝 File size:', req.file.size);
+    }
+
     const userId = req.user?.userId;
 
     if (!userId) {
+      console.log('❌ No userId found in request');
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -106,7 +116,17 @@ router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest
       discountPrice
     } = req.body;
 
+    console.log('📝 Extracted fields:', {
+      venueId,
+      postType,
+      postStyle,
+      title: title?.substring(0, 50),
+      content: content?.substring(0, 50),
+      imageLayout
+    });
+
     if (!title || !content) {
+      console.log('❌ Missing title or content');
       return res.status(400).json({ error: 'Title and content are required' });
     }
 
@@ -135,14 +155,18 @@ router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest
     }
 
     // Determine author type based on whether they're a venue manager
+    console.log('🔍 Looking up user:', userId);
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true, venueIds: true }
     });
+    console.log('👤 User found:', user);
 
     const authorType = user?.role === 'VENUE_MANAGER' && venueId ? 'VENUE' : 'USER';
+    console.log('✍️ Author type:', authorType);
 
     // Create post
+    console.log('💾 Creating post in database...');
     const post = await prisma.post.create({
       data: {
         authorId: userId,
