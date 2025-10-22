@@ -207,7 +207,31 @@ router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest
       }
     });
 
-    res.status(201).json({ post });
+    // Format response to match iOS expectations
+    const formattedPost = {
+      id: post.id,
+      authorId: post.authorId,
+      authorName: `${post.author.firstName} ${post.author.lastName}`,
+      authorType: post.authorType,
+      venueId: post.venueId,
+      venueName: post.venue?.name || null,
+      postType: post.postType,
+      title: post.title,
+      content: post.content,
+      imageURL: post.mediaUrl,
+      timestamp: post.createdAt.toISOString(),
+      likes: post.likes,
+      isLiked: false, // New posts are not liked by creator
+      comments: post.comments,
+      eventId: post.eventId,
+      dealId: post.dealId,
+      startTime: post.startTime?.toISOString() || null,
+      endTime: post.endTime?.toISOString() || null,
+      originalPrice: post.originalPrice,
+      discountPrice: post.discountPrice
+    };
+
+    res.status(201).json({ post: formattedPost });
   } catch (error) {
     console.error('❌ Error creating post:', error);
     console.error('❌ Error details:', JSON.stringify(error, null, 2));
