@@ -72,7 +72,31 @@ router.get('/', async (req: Request, res: Response) => {
       skip: Number(offset)
     });
 
-    res.json({ posts });
+    // Format posts to match iOS expectations
+    const formattedPosts = posts.map(post => ({
+      id: post.id,
+      authorId: post.authorId,
+      authorName: `${post.author.firstName} ${post.author.lastName}`,
+      authorType: post.authorType,
+      venueId: post.venueId,
+      venueName: post.venue?.name || null,
+      postType: post.postType,
+      title: post.title,
+      content: post.content,
+      imageURL: post.mediaUrl,
+      timestamp: post.createdAt.toISOString(),
+      likes: post.likes,
+      isLiked: false, // TODO: Check if current user liked this post
+      comments: post.comments,
+      eventId: post.eventId,
+      dealId: post.dealId,
+      startTime: post.startTime?.toISOString() || null,
+      endTime: post.endTime?.toISOString() || null,
+      originalPrice: post.originalPrice,
+      discountPrice: post.discountPrice
+    }));
+
+    res.json({ posts: formattedPosts });
   } catch (error) {
     console.error('Error fetching posts:', error);
     res.status(500).json({ error: 'Failed to fetch posts' });
