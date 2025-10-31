@@ -3,49 +3,24 @@ import { CreateConversationDTO, SendMessageDTO, GetMessagesDTO } from './messagi
 
 export class MessagingService {
   /**
-   * Get all conversations for a user
+   * Get all conversations for a user (OPTIMIZED - reduced nesting)
    */
   async getConversations(userId: string) {
+    // Step 1: Get user's conversation participations (lightweight query)
     const participations = await prisma.conversationParticipant.findMany({
       where: {
         userId: userId,
         isActive: true
       },
-      include: {
+      select: {
+        conversationId: true,
+        lastReadAt: true,
         conversation: {
-          include: {
-            participants: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    email: true,
-                    firstName: true,
-                    lastName: true,
-                    profileImage: true,
-                    lastActiveAt: true
-                  }
-                }
-              },
-              where: {
-                isActive: true
-              }
-            },
-            messages: {
-              orderBy: {
-                createdAt: 'desc'
-              },
-              take: 1,
-              include: {
-                sender: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
+          select: {
+            id: true,
+            type: true,
+            name: true,
+            updatedAt: true
           }
         }
       },
@@ -53,13 +28,88 @@ export class MessagingService {
         conversation: {
           updatedAt: 'desc'
         }
+      },
+      take: 50 // Limit to recent 50 conversations for performance
+    });
+
+    if (participations.length === 0) {
+      return [];
+    }
+
+    const conversationIds = participations.map(p => p.conversationId);
+
+    // Step 2: Get participants for these conversations (single query with IN clause)
+    const allParticipants = await prisma.conversationParticipant.findMany({
+      where: {
+        conversationId: { in: conversationIds },
+        isActive: true
+      },
+      select: {
+        conversationId: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            profileImage: true,
+            lastActiveAt: true
+          }
+        }
       }
     });
 
-    // Format conversations
+    // Step 3: Get last message for each conversation (single query)
+    const lastMessages = await prisma.message.findMany({
+      where: {
+        conversationId: { in: conversationIds },
+        isDeleted: false
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      distinct: ['conversationId'],
+      select: {
+        id: true,
+        conversationId: true,
+        senderId: true,
+        encryptedContent: true,
+        iv: true,
+        authTag: true,
+        messageType: true,
+        createdAt: true,
+        sender: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    // Step 4: Map participants by conversation ID (in memory - fast)
+    const participantsByConversation = new Map<string, any[]>();
+    for (const participant of allParticipants) {
+      const existing = participantsByConversation.get(participant.conversationId) || [];
+      existing.push(participant.user);
+      participantsByConversation.set(participant.conversationId, existing);
+    }
+
+    // Step 5: Map last messages by conversation ID (in memory - fast)
+    const lastMessageByConversation = new Map<string, any>();
+    for (const msg of lastMessages) {
+      // Only keep the most recent message per conversation
+      if (!lastMessageByConversation.has(msg.conversationId)) {
+        lastMessageByConversation.set(msg.conversationId, msg);
+      }
+    }
+
+    // Step 6: Format conversations (in memory - fast)
     const conversations = participations.map(participation => {
       const conversation = participation.conversation;
-      const lastMessage = conversation.messages[0] || null;
+      const participants = participantsByConversation.get(conversation.id) || [];
+      const lastMessage = lastMessageByConversation.get(conversation.id);
 
       // Calculate unread count (simplified)
       const unreadCount = lastMessage && lastMessage.createdAt > participation.lastReadAt
@@ -70,7 +120,7 @@ export class MessagingService {
         id: conversation.id,
         type: conversation.type,
         name: conversation.name,
-        participants: conversation.participants.map(p => p.user),
+        participants,
         lastMessage: lastMessage ? {
           id: lastMessage.id,
           senderId: lastMessage.senderId,
@@ -91,7 +141,7 @@ export class MessagingService {
   }
 
   /**
-   * Get messages in a conversation
+   * Get messages in a conversation (OPTIMIZED - removed readReceipts for performance)
    */
   async getMessages(userId: string, params: GetMessagesDTO) {
     const { conversationId, limit = 50, before } = params;
@@ -102,6 +152,9 @@ export class MessagingService {
         conversationId,
         userId,
         isActive: true
+      },
+      select: {
+        id: true // Only need ID for verification
       }
     });
 
@@ -121,22 +174,29 @@ export class MessagingService {
       };
     }
 
-    // Get messages
+    // Get messages (removed readReceipts to improve performance)
     const messages = await prisma.message.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        conversationId: true,
+        senderId: true,
+        recipientId: true,
+        encryptedContent: true,
+        iv: true,
+        authTag: true,
+        messageType: true,
+        venueId: true,
+        mediaUrl: true,
+        isEdited: true,
+        createdAt: true,
+        editedAt: true,
         sender: {
           select: {
             id: true,
             firstName: true,
             lastName: true,
             profileImage: true
-          }
-        },
-        readReceipts: {
-          select: {
-            userId: true,
-            readAt: true
           }
         }
       },
@@ -146,26 +206,8 @@ export class MessagingService {
       take: Number(limit)
     });
 
-    // Format messages
-    const formattedMessages = messages.map(msg => ({
-      id: msg.id,
-      conversationId: msg.conversationId,
-      senderId: msg.senderId,
-      sender: msg.sender,
-      recipientId: msg.recipientId,
-      encryptedContent: msg.encryptedContent,
-      iv: msg.iv,
-      authTag: msg.authTag,
-      messageType: msg.messageType,
-      venueId: msg.venueId,
-      mediaUrl: msg.mediaUrl,
-      isEdited: msg.isEdited,
-      createdAt: msg.createdAt,
-      editedAt: msg.editedAt,
-      readReceipts: msg.readReceipts
-    }));
-
-    return formattedMessages.reverse();
+    // Messages are already properly formatted
+    return messages.reverse();
   }
 
   /**
@@ -264,7 +306,7 @@ export class MessagingService {
   }
 
   /**
-   * Send an encrypted message
+   * Send an encrypted message (OPTIMIZED - reduced queries, fire-and-forget updates)
    */
   async sendMessage(userId: string, data: SendMessageDTO) {
     const {
@@ -277,34 +319,36 @@ export class MessagingService {
       mediaUrl
     } = data;
 
-    // Verify user is a participant
-    const participant = await prisma.conversationParticipant.findFirst({
-      where: {
-        conversationId,
-        userId,
-        isActive: true
-      }
-    });
+    // Combined query: check participant AND get conversation in parallel
+    const [participant, conversation] = await Promise.all([
+      prisma.conversationParticipant.findFirst({
+        where: {
+          conversationId,
+          userId,
+          isActive: true
+        }
+      }),
+      prisma.conversation.findUnique({
+        where: { id: conversationId },
+        select: {
+          id: true,
+          type: true,
+          participants: {
+            where: {
+              userId: { not: userId },
+              isActive: true
+            },
+            select: {
+              userId: true
+            }
+          }
+        }
+      })
+    ]);
 
     if (!participant) {
       throw new Error('Not a participant in this conversation');
     }
-
-    // Get conversation to determine recipient
-    const conversation = await prisma.conversation.findUnique({
-      where: { id: conversationId },
-      include: {
-        participants: {
-          where: {
-            userId: { not: userId },
-            isActive: true
-          },
-          select: {
-            userId: true
-          }
-        }
-      }
-    });
 
     if (!conversation) {
       throw new Error('Conversation not found');
@@ -339,28 +383,40 @@ export class MessagingService {
       }
     });
 
-    // Update conversation timestamp
-    await prisma.conversation.update({
+    // Update conversation timestamp (fire-and-forget to avoid blocking response)
+    // Don't await this - let it happen in the background
+    prisma.conversation.update({
       where: { id: conversationId },
       data: { updatedAt: new Date() }
-    });
+    }).catch(err => console.error('Failed to update conversation timestamp:', err));
 
     return message;
   }
 
   /**
-   * Mark a message as read
+   * Mark a message as read (OPTIMIZED - parallel queries)
    */
   async markMessageAsRead(userId: string, messageId: string) {
-    // Get message
-    const message = await prisma.message.findUnique({
-      where: { id: messageId },
-      select: {
-        id: true,
-        conversationId: true,
-        senderId: true
-      }
-    });
+    // Get message and verify participant in parallel
+    const [message, participant] = await Promise.all([
+      prisma.message.findUnique({
+        where: { id: messageId },
+        select: {
+          id: true,
+          conversationId: true,
+          senderId: true
+        }
+      }),
+      prisma.$queryRaw`
+        SELECT cp.id, cp."conversationId"
+        FROM conversation_participants cp
+        JOIN messages m ON m."conversationId" = cp."conversationId"
+        WHERE m.id = ${messageId}
+        AND cp."userId" = ${userId}
+        AND cp."isActive" = true
+        LIMIT 1
+      ` as Promise<any[]>
+    ]);
 
     if (!message) {
       throw new Error('Message not found');
@@ -371,20 +427,11 @@ export class MessagingService {
       throw new Error('Cannot mark own message as read');
     }
 
-    // Verify user is a participant
-    const participant = await prisma.conversationParticipant.findFirst({
-      where: {
-        conversationId: message.conversationId,
-        userId,
-        isActive: true
-      }
-    });
-
-    if (!participant) {
+    if (!participant || participant.length === 0) {
       throw new Error('Not a participant in this conversation');
     }
 
-    // Create or update read receipt
+    // Create/update read receipt and update last read time in parallel (fire-and-forget for last read)
     const readReceipt = await prisma.messageReadReceipt.upsert({
       where: {
         messageId_userId: {
@@ -401,11 +448,11 @@ export class MessagingService {
       }
     });
 
-    // Update participant's last read time
-    await prisma.conversationParticipant.update({
-      where: { id: participant.id },
+    // Update participant's last read time (fire-and-forget to avoid blocking)
+    prisma.conversationParticipant.update({
+      where: { id: participant[0].id },
       data: { lastReadAt: new Date() }
-    });
+    }).catch(err => console.error('Failed to update lastReadAt:', err));
 
     return readReceipt;
   }
