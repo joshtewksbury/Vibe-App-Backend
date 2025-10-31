@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from './auth';
-
-const prisma = new PrismaClient();
+import prisma from '../../lib/prisma';
 
 // Actions that should be audited
 const AUDITABLE_ACTIONS = [

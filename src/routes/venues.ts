@@ -1,20 +1,19 @@
 import express, { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { asyncHandler, createError } from '../middleware/errorHandler';
-import { AuthenticatedRequest, requireRole, requireVenueAccess } from '../middleware/auth';
+import { asyncHandler, createError } from '../shared/middleware/errorHandler';
+import { AuthenticatedRequest, requireRole, requireVenueAccess } from '../shared/middleware/auth';
 import {
   validateCreateVenue,
   validateUpdateVenue,
   validateCreateDeal,
   validateCreateEvent,
   validateCreatePost
-} from '../utils/validation';
+} from '../shared/utils/validation';
 import { SerpAPIService } from '../services/serpApi';
 import { GooglePlacesService } from '../services/googlePlaces';
-import { calculateVenueStatus, getStatusColor } from '../utils/venueStatusColors';
+import { calculateVenueStatus, getStatusColor } from '../shared/utils/venueStatusColors';
+import prisma from '../lib/prisma';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 const serpApiService = new SerpAPIService();
 const googlePlacesService = new GooglePlacesService();
 

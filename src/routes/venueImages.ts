@@ -1,11 +1,11 @@
 import express from 'express';
 import multer from 'multer';
-import { PrismaClient, VenueImageType } from '@prisma/client';
+import { VenueImageType } from '@prisma/client';
 import { imageStorageService } from '../services/imageStorageService';
-import { authMiddleware, AuthenticatedRequest } from '../middleware/auth';
+import { authMiddleware, AuthenticatedRequest } from '../shared/middleware/auth';
+import prisma from '../lib/prisma';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Configure multer for memory storage
 const upload = multer({

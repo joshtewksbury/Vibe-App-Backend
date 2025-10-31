@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { heatmapTileService } from './heatmapTileService';
 import { heatmapConfig } from '../config/heatmap';
-import { HeatMapVenue } from '../types/heatmap';
-
-const prisma = new PrismaClient();
+import { HeatMapVenue } from '../shared/types/heatmap';
+import prisma from '../lib/prisma';
 
 // Tile precomputation and background refresh service
 class TilePrecomputeService {

@@ -5,13 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.heatmapTileService = void 0;
 const sharp_1 = __importDefault(require("sharp"));
-const client_1 = require("@prisma/client");
 const kdeService_1 = require("./kdeService");
 const heatmapCacheService_1 = require("./heatmapCacheService");
-const colormap_1 = require("../utils/colormap");
+const colormap_1 = require("../shared/utils/colormap");
 const heatmap_1 = require("../config/heatmap");
 const crypto_1 = __importDefault(require("crypto"));
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../lib/prisma"));
 class HeatMapTileService {
     // Generate hash of venue data to detect changes
     getVenueHash(venues) {
@@ -38,13 +37,13 @@ class HeatMapTileService {
         }
         // 2. Check database cache (fast)
         try {
-            const dbCached = await prisma.heatMapTile.findUnique({
+            const dbCached = await prisma_1.default.heatMapTile.findUnique({
                 where: { z_x_y: { z, x, y } }
             });
             if (dbCached && dbCached.expiresAt > now && dbCached.venueHash === venueHash) {
                 console.log(`💾 DB cache hit for tile ${z}/${x}/${y}`);
                 // Update hit stats
-                await prisma.heatMapTile.update({
+                await prisma_1.default.heatMapTile.update({
                     where: { id: dbCached.id },
                     data: {
                         hitCount: { increment: 1 },
@@ -71,7 +70,7 @@ class HeatMapTileService {
         heatmapCacheService_1.heatmapCacheService.setTile(memKey, png);
         const expiresAt = new Date(now.getTime() + heatmap_1.heatmapConfig.cacheTTL * 1000);
         try {
-            await prisma.heatMapTile.upsert({
+            await prisma_1.default.heatMapTile.upsert({
                 where: { z_x_y: { z, x, y } },
                 create: {
                     z, x, y,

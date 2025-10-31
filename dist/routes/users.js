@@ -4,12 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const client_1 = require("@prisma/client");
-const errorHandler_1 = require("../middleware/errorHandler");
-const auth_1 = require("../middleware/auth");
-const validation_1 = require("../utils/validation");
+const errorHandler_1 = require("../shared/middleware/errorHandler");
+const auth_1 = require("../shared/middleware/auth");
+const validation_1 = require("../shared/utils/validation");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const router = express_1.default.Router();
-const prisma = new client_1.PrismaClient();
 // GET /users/search - Search for users (public endpoint for friend search)
 router.get('/search', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { query } = req.query;
@@ -18,7 +17,7 @@ router.get('/search', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     }
     const searchTerm = query.trim().toLowerCase();
     // Search users by first name, last name, or email
-    const users = await prisma.user.findMany({
+    const users = await prisma_1.default.user.findMany({
         where: {
             OR: [
                 { firstName: { contains: searchTerm, mode: 'insensitive' } },
@@ -51,7 +50,7 @@ router.put('/me', auth_1.authMiddleware, (0, errorHandler_1.asyncHandler)(async 
     if (error) {
         throw (0, errorHandler_1.createError)(error.details[0].message, 400);
     }
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma_1.default.user.update({
         where: { id: req.user.id },
         data: value,
         select: {
@@ -81,7 +80,7 @@ router.get('/me/activity', auth_1.authMiddleware, (0, errorHandler_1.asyncHandle
     const userId = req.user.id;
     const { limit = 20, offset = 0 } = req.query;
     const [posts, recentVenues] = await Promise.all([
-        prisma.post.findMany({
+        prisma_1.default.post.findMany({
             where: { authorId: userId },
             include: {
                 venue: {
@@ -110,7 +109,7 @@ router.get('/me/activity', auth_1.authMiddleware, (0, errorHandler_1.asyncHandle
 router.delete('/me', auth_1.authMiddleware, (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const userId = req.user.id;
     // In a production app, you might want to soft delete or anonymize data
-    await prisma.user.delete({
+    await prisma_1.default.user.delete({
         where: { id: userId }
     });
     res.json({

@@ -5,8 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requireVenueAccess = exports.requireRole = exports.authMiddleware = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const authMiddleware = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
@@ -27,7 +26,7 @@ const authMiddleware = async (req, res, next) => {
         // Verify JWT token
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
         // Get user from database to ensure they still exist and get latest data
-        const user = await prisma.user.findUnique({
+        const user = await prisma_1.default.user.findUnique({
             where: { id: decoded.userId },
             select: {
                 id: true,
@@ -48,7 +47,7 @@ const authMiddleware = async (req, res, next) => {
         const shouldUpdate = (Date.now() - user.lastActiveAt.getTime()) / (1000 * 60 * 60) >= 1;
         if (shouldUpdate) {
             // Fire and forget - don't await to avoid blocking the request
-            prisma.user.update({
+            prisma_1.default.user.update({
                 where: { id: user.id },
                 data: { lastActiveAt: new Date() }
             }).catch(err => console.error('Failed to update lastActiveAt:', err));

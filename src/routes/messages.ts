@@ -1,10 +1,9 @@
 import express, { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { encryptMessage, decryptMessage } from '../utils/encryption';
+import { authMiddleware, AuthRequest } from '../shared/middleware/auth';
+import { encryptMessage, decryptMessage } from '../shared/utils/encryption';
+import prisma from '../lib/prisma';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 /**
  * GET /messages/conversations

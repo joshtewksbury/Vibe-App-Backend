@@ -1,13 +1,12 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
-import { asyncHandler, createError } from '../middleware/errorHandler';
-import { authMiddleware, AuthenticatedRequest } from '../middleware/auth';
-import { validateSignUp, validateSignIn } from '../utils/validation';
+import { asyncHandler, createError } from '../shared/middleware/errorHandler';
+import { authMiddleware, AuthenticatedRequest } from '../shared/middleware/auth';
+import { validateSignUp, validateSignIn } from '../shared/utils/validation';
+import prisma from '../lib/prisma';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Sign up
 router.post('/signup', asyncHandler(async (req: Request, res: Response) => {

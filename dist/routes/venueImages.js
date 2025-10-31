@@ -5,11 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
-const client_1 = require("@prisma/client");
 const imageStorageService_1 = require("../services/imageStorageService");
-const auth_1 = require("../middleware/auth");
+const auth_1 = require("../shared/middleware/auth");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const router = express_1.default.Router();
-const prisma = new client_1.PrismaClient();
 // Configure multer for memory storage
 const upload = (0, multer_1.default)({
     storage: multer_1.default.memoryStorage(),
@@ -44,7 +43,7 @@ router.get('/venues/:venueId/images', auth_1.authMiddleware, async (req, res) =>
         const { venueId } = req.params;
         console.log(`🖼️ Fetching images for venue: ${venueId}`);
         // Verify venue exists
-        const venue = await prisma.venue.findUnique({
+        const venue = await prisma_1.default.venue.findUnique({
             where: { id: venueId }
         });
         if (!venue) {
@@ -54,7 +53,7 @@ router.get('/venues/:venueId/images', auth_1.authMiddleware, async (req, res) =>
             });
         }
         // Fetch all active images for the venue
-        const images = await prisma.venueImage.findMany({
+        const images = await prisma_1.default.venueImage.findMany({
             where: {
                 venueId,
                 isActive: true
@@ -111,7 +110,7 @@ router.post('/venues/:venueId/images/upload', auth_1.authMiddleware, upload.sing
             });
         }
         // Verify venue exists
-        const venue = await prisma.venue.findUnique({
+        const venue = await prisma_1.default.venue.findUnique({
             where: { id: venueId }
         });
         if (!venue) {
@@ -122,7 +121,7 @@ router.post('/venues/:venueId/images/upload', auth_1.authMiddleware, upload.sing
         }
         // For ICON and BANNER types, deactivate existing images
         if (imageType === 'ICON' || imageType === 'BANNER') {
-            await prisma.venueImage.updateMany({
+            await prisma_1.default.venueImage.updateMany({
                 where: {
                     venueId,
                     imageType: imageType,
@@ -137,7 +136,7 @@ router.post('/venues/:venueId/images/upload', auth_1.authMiddleware, upload.sing
         // Process and upload image
         const uploadResult = await imageStorageService_1.imageStorageService.processAndUpload(file.buffer, venueId, imageType, file.originalname);
         // Save to database
-        const venueImage = await prisma.venueImage.create({
+        const venueImage = await prisma_1.default.venueImage.create({
             data: {
                 venueId,
                 imageType: imageType,
@@ -180,7 +179,7 @@ router.put('/venues/:venueId/images/:imageId', auth_1.authMiddleware, async (req
         const { caption, altText, displayOrder, isActive } = req.body;
         console.log(`🖼️ Updating image ${imageId} for venue ${venueId}`);
         // Verify image belongs to venue
-        const existingImage = await prisma.venueImage.findFirst({
+        const existingImage = await prisma_1.default.venueImage.findFirst({
             where: {
                 id: imageId,
                 venueId
@@ -193,7 +192,7 @@ router.put('/venues/:venueId/images/:imageId', auth_1.authMiddleware, async (req
             });
         }
         // Update image metadata
-        const updatedImage = await prisma.venueImage.update({
+        const updatedImage = await prisma_1.default.venueImage.update({
             where: { id: imageId },
             data: {
                 caption: caption !== undefined ? caption : undefined,
@@ -226,7 +225,7 @@ router.delete('/venues/:venueId/images/:imageId', auth_1.authMiddleware, async (
         const { permanent } = req.query;
         console.log(`🗑️ Deleting image ${imageId} for venue ${venueId} (permanent: ${permanent})`);
         // Verify image belongs to venue
-        const existingImage = await prisma.venueImage.findFirst({
+        const existingImage = await prisma_1.default.venueImage.findFirst({
             where: {
                 id: imageId,
                 venueId
@@ -244,7 +243,7 @@ router.delete('/venues/:venueId/images/:imageId', auth_1.authMiddleware, async (
                 // Delete from cloud storage
                 imageStorageService_1.imageStorageService.deleteImages([existingImage.url, existingImage.thumbnailUrl].filter(Boolean)),
                 // Delete from database
-                prisma.venueImage.delete({ where: { id: imageId } })
+                prisma_1.default.venueImage.delete({ where: { id: imageId } })
             ]);
             res.json({
                 success: true,
@@ -254,7 +253,7 @@ router.delete('/venues/:venueId/images/:imageId', auth_1.authMiddleware, async (
         }
         else {
             // Soft delete - mark as inactive
-            await prisma.venueImage.update({
+            await prisma_1.default.venueImage.update({
                 where: { id: imageId },
                 data: { isActive: false }
             });
@@ -294,7 +293,7 @@ router.get('/venues/images/bulk', auth_1.authMiddleware, async (req, res) => {
         }
         console.log(`🖼️ Fetching bulk images for ${venueIdArray.length} venues`);
         // Fetch images for all venues
-        const images = await prisma.venueImage.findMany({
+        const images = await prisma_1.default.venueImage.findMany({
             where: {
                 venueId: { in: venueIdArray },
                 isActive: true
@@ -347,7 +346,7 @@ router.get('/venues/:venueId/images/stats', auth_1.authMiddleware, async (req, r
         const { venueId } = req.params;
         // Get statistics
         const [stats, totalStats] = await Promise.all([
-            prisma.venueImage.groupBy({
+            prisma_1.default.venueImage.groupBy({
                 by: ['imageType'],
                 where: {
                     venueId,
@@ -357,7 +356,7 @@ router.get('/venues/:venueId/images/stats', auth_1.authMiddleware, async (req, r
                 _sum: { fileSize: true },
                 _avg: { width: true, height: true }
             }),
-            prisma.venueImage.aggregate({
+            prisma_1.default.venueImage.aggregate({
                 where: {
                     venueId,
                     isActive: true

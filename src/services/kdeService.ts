@@ -1,5 +1,5 @@
-import { HeatMapVenue, GridCell } from '../types/heatmap';
-import { WebMercator } from '../utils/projection';
+import { HeatMapVenue, GridCell } from '../shared/types/heatmap';
+import { WebMercator } from '../shared/utils/projection';
 import { heatmapConfig } from '../config/heatmap';
 
 // Spatial grid for fast venue lookup - O(1) instead of O(n)
@@ -99,20 +99,51 @@ class KDEService {
     bandwidth: number
   ): number {
     let sum = 0;
-    const variance = bandwidth * bandwidth;
-    const normalizer = 1 / (2 * Math.PI * variance);
-    const cutoffDist = bandwidth * 3; // 3-sigma cutoff
-    const cutoffDistSq = cutoffDist * cutoffDist;
 
     for (const venue of venues) {
+      // Skip venues with no occupancy
+      if (venue.currentOccupancy <= 0) continue;
+
       const [vx, vy] = WebMercator.lngLatToMeters(venue.longitude, venue.latitude);
-      const weight = Math.min(venue.currentOccupancy / venue.capacity, 1.0);
+
+      // Calculate weight based on BOTH absolute occupancy AND percentage
+      // This gives more heat to venues with more people, not just higher percentages
+      const occupancyPercentage = Math.min(venue.currentOccupancy / venue.capacity, 1.0);
+
+      // Use a combination of absolute occupancy and percentage:
+      // - Base weight on actual number of people (scaled by typical venue size ~200)
+      // - Multiply by percentage to boost venues that are full
+      // - This means 650 people at 81% full >> 45 people at 38% full
+      const absoluteWeight = venue.currentOccupancy / 200.0; // Normalize by typical venue capacity
+      const weight = absoluteWeight * (0.5 + 0.5 * occupancyPercentage); // Blend absolute + percentage
+
+      // Dynamic bandwidth: larger blooms for busier venues
+      // Quiet venues (0-30%): 70% of base bandwidth (tighter bloom)
+      // Moderate venues (30-60%): 100% of base bandwidth
+      // Busy venues (60-90%): 130% of base bandwidth (larger bloom)
+      // Very busy venues (90-100%): 160% of base bandwidth (much larger bloom)
+      let bandwidthMultiplier = 1.0;
+      if (occupancyPercentage < 0.3) {
+        bandwidthMultiplier = 0.7; // Smaller blooms for quiet venues
+      } else if (occupancyPercentage < 0.6) {
+        bandwidthMultiplier = 1.0; // Normal blooms for moderate venues
+      } else if (occupancyPercentage < 0.9) {
+        bandwidthMultiplier = 1.3; // Larger blooms for busy venues
+      } else {
+        bandwidthMultiplier = 1.6; // Much larger blooms for very busy venues
+      }
+
+      const venueBandwidth = bandwidth * bandwidthMultiplier;
+      const variance = venueBandwidth * venueBandwidth;
+      const normalizer = 1 / (2 * Math.PI * variance);
+      const cutoffDist = venueBandwidth * 3; // 3-sigma cutoff
+      const cutoffDistSq = cutoffDist * cutoffDist;
 
       const dx = px - vx;
       const dy = py - vy;
       const distSq = dx * dx + dy * dy;
 
-      // Skip venues outside 3-sigma radius (contributes <1% intensity)
+      // Skip venues outside their 3-sigma radius
       if (distSq > cutoffDistSq) continue;
 
       sum += weight * normalizer * Math.exp(-distSq / (2 * variance));
@@ -128,8 +159,9 @@ class KDEService {
     venues: HeatMapVenue[]
   ): Float32Array {
     // Compute global max intensity if needed
+    // Refresh every 2 minutes for real-time updates
     if (this.globalMaxIntensity === 0 ||
-        Date.now() - this.lastVenueUpdate.getTime() > 60000) { // Refresh every minute
+        Date.now() - this.lastVenueUpdate.getTime() > 120000) { // Refresh every 2 minutes
       this.computeGlobalMaxIntensity(venues, z);
     }
 

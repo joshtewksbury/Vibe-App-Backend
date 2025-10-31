@@ -4,15 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const client_1 = require("@prisma/client");
-const errorHandler_1 = require("../middleware/errorHandler");
-const auth_1 = require("../middleware/auth");
-const validation_1 = require("../utils/validation");
+const errorHandler_1 = require("../shared/middleware/errorHandler");
+const auth_1 = require("../shared/middleware/auth");
+const validation_1 = require("../shared/utils/validation");
 const serpApi_1 = require("../services/serpApi");
 const googlePlaces_1 = require("../services/googlePlaces");
-const venueStatusColors_1 = require("../utils/venueStatusColors");
+const venueStatusColors_1 = require("../shared/utils/venueStatusColors");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const router = express_1.default.Router();
-const prisma = new client_1.PrismaClient();
 const serpApiService = new serpApi_1.SerpAPIService();
 const googlePlacesService = new googlePlaces_1.GooglePlacesService();
 // GET /venues - Get all venues with optional filtering
@@ -45,7 +44,7 @@ router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
             lte: longitude + lngRange
         };
     }
-    const venues = await prisma.venue.findMany({
+    const venues = await prisma_1.default.venue.findMany({
         where: whereClause,
         orderBy,
         take: parseInt(limit),
@@ -181,7 +180,7 @@ router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
 // GET /venues/:id - Get single venue
 router.get('/:id', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { id } = req.params;
-    const venue = await prisma.venue.findUnique({
+    const venue = await prisma_1.default.venue.findUnique({
         where: { id },
         include: {
             busySnapshots: {
@@ -239,14 +238,14 @@ router.get('/:id', (0, errorHandler_1.asyncHandler)(async (req, res) => {
 router.get('/:id/busy', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { id } = req.params;
     const { hours = 24 } = req.query;
-    const venue = await prisma.venue.findUnique({
+    const venue = await prisma_1.default.venue.findUnique({
         where: { id }
     });
     if (!venue) {
         throw (0, errorHandler_1.createError)('Venue not found', 404);
     }
     const hoursBack = parseInt(hours);
-    const snapshots = await prisma.busySnapshot.findMany({
+    const snapshots = await prisma_1.default.busySnapshot.findMany({
         where: {
             venueId: id,
             timestamp: {
@@ -264,7 +263,7 @@ router.get('/:id/busy', (0, errorHandler_1.asyncHandler)(async (req, res) => {
 // GET /venues/:id/busy/aggregates - Get venue busy aggregates
 router.get('/:id/busy/aggregates', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { id } = req.params;
-    const venue = await prisma.venue.findUnique({
+    const venue = await prisma_1.default.venue.findUnique({
         where: { id }
     });
     if (!venue) {
@@ -272,7 +271,7 @@ router.get('/:id/busy/aggregates', (0, errorHandler_1.asyncHandler)(async (req, 
     }
     // Get snapshots for the last 30 days for aggregation
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const snapshots = await prisma.busySnapshot.findMany({
+    const snapshots = await prisma_1.default.busySnapshot.findMany({
         where: {
             venueId: id,
             timestamp: { gte: thirtyDaysAgo }
@@ -327,7 +326,7 @@ router.post('/', (0, auth_1.requireRole)(['ADMIN']), (0, errorHandler_1.asyncHan
     if (error) {
         throw (0, errorHandler_1.createError)(error.details[0].message, 400);
     }
-    const venue = await prisma.venue.create({
+    const venue = await prisma_1.default.venue.create({
         data: value
     });
     res.status(201).json({
@@ -342,7 +341,7 @@ router.put('/:id', (0, auth_1.requireRole)(['ADMIN']), (0, errorHandler_1.asyncH
     if (error) {
         throw (0, errorHandler_1.createError)(error.details[0].message, 400);
     }
-    const venue = await prisma.venue.update({
+    const venue = await prisma_1.default.venue.update({
         where: { id },
         data: value
     });
@@ -358,7 +357,7 @@ router.post('/:id/deals', (0, auth_1.requireRole)(['VENUE_MANAGER', 'ADMIN']), (
     if (error) {
         throw (0, errorHandler_1.createError)(error.details[0].message, 400);
     }
-    const deal = await prisma.deal.create({
+    const deal = await prisma_1.default.deal.create({
         data: {
             ...value,
             venueId,
@@ -377,7 +376,7 @@ router.post('/:id/events', (0, auth_1.requireRole)(['VENUE_MANAGER', 'ADMIN']), 
     if (error) {
         throw (0, errorHandler_1.createError)(error.details[0].message, 400);
     }
-    const event = await prisma.event.create({
+    const event = await prisma_1.default.event.create({
         data: {
             ...value,
             venueId,
@@ -396,7 +395,7 @@ router.post('/:id/posts', (0, auth_1.requireRole)(['VENUE_MANAGER', 'ADMIN']), (
     if (error) {
         throw (0, errorHandler_1.createError)(error.details[0].message, 400);
     }
-    const post = await prisma.post.create({
+    const post = await prisma_1.default.post.create({
         data: {
             ...value,
             venueId,
@@ -412,7 +411,7 @@ router.post('/:id/posts', (0, auth_1.requireRole)(['VENUE_MANAGER', 'ADMIN']), (
 router.get('/:id/analytics/overview', (0, auth_1.requireRole)(['VENUE_MANAGER', 'ADMIN']), (0, auth_1.requireVenueAccess)(), (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { id: venueId } = req.params;
     // Get venue
-    const venue = await prisma.venue.findUnique({
+    const venue = await prisma_1.default.venue.findUnique({
         where: { id: venueId }
     });
     if (!venue) {
@@ -421,25 +420,25 @@ router.get('/:id/analytics/overview', (0, auth_1.requireRole)(['VENUE_MANAGER', 
     // Calculate analytics
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const [snapshots, deals, events, posts] = await Promise.all([
-        prisma.busySnapshot.findMany({
+        prisma_1.default.busySnapshot.findMany({
             where: {
                 venueId,
                 timestamp: { gte: thirtyDaysAgo }
             }
         }),
-        prisma.deal.count({
+        prisma_1.default.deal.count({
             where: {
                 venueId,
                 createdAt: { gte: thirtyDaysAgo }
             }
         }),
-        prisma.event.count({
+        prisma_1.default.event.count({
             where: {
                 venueId,
                 createdAt: { gte: thirtyDaysAgo }
             }
         }),
-        prisma.post.count({
+        prisma_1.default.post.count({
             where: {
                 venueId,
                 createdAt: { gte: thirtyDaysAgo }
@@ -483,7 +482,7 @@ router.get('/:id/analytics/overview', (0, auth_1.requireRole)(['VENUE_MANAGER', 
 // POST /venues/populate-popular-times - Populate all venues with popular times data
 router.post('/populate-popular-times', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     console.log('🔄 Starting popular times population for all venues...');
-    const venues = await prisma.venue.findMany({
+    const venues = await prisma_1.default.venue.findMany({
         select: {
             id: true,
             name: true,
@@ -510,7 +509,7 @@ router.post('/populate-popular-times', (0, errorHandler_1.asyncHandler)(async (r
             // Try SerpAPI first
             const popularTimesData = await serpApiService.fetchPopularTimes(venue.name, venue.location);
             if (popularTimesData && popularTimesData.popularTimes) {
-                await prisma.venue.update({
+                await prisma_1.default.venue.update({
                     where: { id: venue.id },
                     data: {
                         popularTimes: popularTimesData.popularTimes,
@@ -522,12 +521,12 @@ router.post('/populate-popular-times', (0, errorHandler_1.asyncHandler)(async (r
             }
             else {
                 // Generate estimated data based on venue category
-                const venueWithCategory = await prisma.venue.findUnique({
+                const venueWithCategory = await prisma_1.default.venue.findUnique({
                     where: { id: venue.id },
                     select: { category: true }
                 });
                 const estimatedData = serpApiService.generateEstimatedPopularTimes(venueWithCategory?.category || 'bar');
-                await prisma.venue.update({
+                await prisma_1.default.venue.update({
                     where: { id: venue.id },
                     data: {
                         popularTimes: estimatedData,
@@ -565,7 +564,7 @@ async function ensurePopularTimes(venue) {
             const popularTimesData = await serpApiService.fetchPopularTimes(venue.name, venue.location);
             if (popularTimesData && popularTimesData.popularTimes) {
                 // Update in background
-                prisma.venue.update({
+                prisma_1.default.venue.update({
                     where: { id: venue.id },
                     data: {
                         popularTimes: popularTimesData.popularTimes,

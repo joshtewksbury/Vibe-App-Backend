@@ -1,4 +1,4 @@
-import { HeatMapVenue, GridCell } from '../types/heatmap';
+import { HeatMapVenue, GridCell } from '../shared/types/heatmap';
 declare class KDEService {
     private globalMaxIntensity;
     private lastVenueUpdate;

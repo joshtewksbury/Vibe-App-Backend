@@ -1,8 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.auditLogger = void 0;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = __importDefault(require("../lib/prisma"));
 // Actions that should be audited
 const AUDITABLE_ACTIONS = [
     'POST', 'PUT', 'PATCH', 'DELETE'
@@ -56,7 +58,7 @@ const auditLogger = async (req, res, next) => {
                 ipAddress: req.ip || req.connection.remoteAddress,
                 userAgent: req.get('User-Agent')
             };
-            await prisma.auditLog.create({
+            await prisma_1.default.auditLog.create({
                 data: auditData
             });
         }

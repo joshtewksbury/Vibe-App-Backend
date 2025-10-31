@@ -4,12 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const client_1 = require("@prisma/client");
 const heatmapTileService_1 = require("../services/heatmapTileService");
 const heatmap_1 = require("../config/heatmap");
-const auth_1 = require("../middleware/auth");
+const auth_1 = require("../shared/middleware/auth");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const router = express_1.default.Router();
-const prisma = new client_1.PrismaClient();
 // Convert venue database model to heat map format
 function convertVenueToHeatMap(venue) {
     return {
@@ -33,7 +32,7 @@ async function getHeatMapVenues() {
     if (venueCache && now - venueCache.timestamp < VENUE_CACHE_TTL) {
         return venueCache.venues;
     }
-    const venues = await prisma.venue.findMany({
+    const venues = await prisma_1.default.venue.findMany({
         select: {
             id: true,
             name: true,
@@ -200,7 +199,7 @@ router.post('/precompute', auth_1.authMiddleware, async (req, res) => {
 router.get('/stats', auth_1.authMiddleware, async (req, res) => {
     try {
         const stats = heatmapTileService_1.heatmapTileService.getStats();
-        const venueCount = await prisma.venue.count({
+        const venueCount = await prisma_1.default.venue.count({
             where: {
                 capacity: { gt: 0 },
                 currentOccupancy: { gte: 0 }

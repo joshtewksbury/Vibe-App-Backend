@@ -4,10 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const client_1 = require("@prisma/client");
-const errorHandler_1 = require("../middleware/errorHandler");
+const errorHandler_1 = require("../shared/middleware/errorHandler");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const router = express_1.default.Router();
-const prisma = new client_1.PrismaClient();
 // GET /feed - Get personalized feed
 router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { city, limit = 20, offset = 0, type } = req.query;
@@ -24,7 +23,7 @@ router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     // Filter by type if provided (posts, deals, events)
     const feedItems = [];
     if (!type || type === 'posts') {
-        const posts = await prisma.post.findMany({
+        const posts = await prisma_1.default.post.findMany({
             where: whereClause,
             include: {
                 venue: {
@@ -56,7 +55,7 @@ router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
         })));
     }
     if (!type || type === 'deals') {
-        const deals = await prisma.deal.findMany({
+        const deals = await prisma_1.default.deal.findMany({
             where: {
                 ...whereClause,
                 isActive: true,
@@ -86,7 +85,7 @@ router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
         })));
     }
     if (!type || type === 'events') {
-        const events = await prisma.event.findMany({
+        const events = await prisma_1.default.event.findMany({
             where: {
                 ...whereClause,
                 isActive: true,
@@ -139,7 +138,7 @@ router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
 router.get('/trending', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { limit = 10 } = req.query;
     // Get trending posts (by likes and recent activity)
-    const trendingPosts = await prisma.post.findMany({
+    const trendingPosts = await prisma_1.default.post.findMany({
         where: {
             createdAt: {
                 gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last week
@@ -161,7 +160,7 @@ router.get('/trending', (0, errorHandler_1.asyncHandler)(async (req, res) => {
         take: parseInt(limit)
     });
     // Get popular venues (by recent activity)
-    const popularVenues = await prisma.venue.findMany({
+    const popularVenues = await prisma_1.default.venue.findMany({
         include: {
             busySnapshots: {
                 where: {

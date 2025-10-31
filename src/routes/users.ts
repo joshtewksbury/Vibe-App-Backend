@@ -1,11 +1,10 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
-import { asyncHandler, createError } from '../middleware/errorHandler';
-import { authMiddleware, AuthenticatedRequest } from '../middleware/auth';
-import { validateUpdateUser } from '../utils/validation';
+import { asyncHandler, createError } from '../shared/middleware/errorHandler';
+import { authMiddleware, AuthenticatedRequest } from '../shared/middleware/auth';
+import { validateUpdateUser } from '../shared/utils/validation';
+import prisma from '../lib/prisma';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // GET /users/search - Search for users (public endpoint for friend search)
 router.get('/search', asyncHandler(async (req, res) => {

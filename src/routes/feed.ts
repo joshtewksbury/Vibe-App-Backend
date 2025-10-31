@@ -1,10 +1,9 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
-import { asyncHandler, createError } from '../middleware/errorHandler';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { asyncHandler, createError } from '../shared/middleware/errorHandler';
+import { AuthenticatedRequest } from '../shared/middleware/auth';
+import prisma from '../lib/prisma';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // GET /feed - Get personalized feed
 router.get('/', asyncHandler(async (req: AuthenticatedRequest, res) => {

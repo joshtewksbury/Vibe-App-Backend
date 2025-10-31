@@ -3,16 +3,20 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { config } from 'dotenv';
-import { PrismaClient } from '@prisma/client';
 import * as Sentry from '@sentry/node';
-import { authMiddleware } from './middleware/auth';
-import { rateLimitMiddleware } from './middleware/rateLimiting';
-import { errorHandler } from './middleware/errorHandler';
-import { auditLogger } from './middleware/auditLogger';
+import { authMiddleware } from './shared/middleware/auth';
+import { rateLimitMiddleware } from './shared/middleware/rateLimiting';
+import { errorHandler } from './shared/middleware/errorHandler';
+import { auditLogger } from './shared/middleware/auditLogger';
 import { tilePrecomputeService } from './services/tilePrecomputeService';
+import prisma from './lib/prisma';
 
-// Route imports
-import authRoutes from './routes/auth';
+// Module route imports (new modular structure)
+import authRoutes from './modules/auth/auth.routes';
+import friendsRoutes from './modules/friends/friends.routes';
+import messagesRoutes from './modules/messaging/messaging.routes';
+
+// Legacy route imports (to be refactored)
 import venueRoutes from './routes/venues';
 import venueImageRoutes from './routes/venueImages';
 import userRoutes from './routes/users';
@@ -20,16 +24,15 @@ import feedRoutes from './routes/feed';
 import heatmapRoutes from './routes/heatmap';
 import imageRoutes from './routes/images';
 import imageProxyRoutes from './routes/imageProxy';
-import friendsRoutes from './routes/friends';
-import messagesRoutes from './routes/messages';
 import postsRoutes from './routes/posts';
 import storiesRoutes from './routes/stories';
+import accountSettingsRoutes from './routes/accountSettings';
+import eventsRoutes from './routes/events';
 
 // Load environment variables
 config();
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 
 // Initialize Sentry for error tracking (production only)
@@ -115,6 +118,8 @@ app.use('/friends', friendsRoutes); // Friends routes include their own auth mid
 app.use('/messages', messagesRoutes); // Messages routes include their own auth middleware
 app.use('/posts', postsRoutes); // Posts routes include their own auth middleware
 app.use('/stories', storiesRoutes); // Stories routes include their own auth middleware
+app.use('/account', accountSettingsRoutes); // Account settings routes with auth
+app.use('/events', eventsRoutes); // Events routes with auth
 
 // Sentry error handler must be registered before other error handlers
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {

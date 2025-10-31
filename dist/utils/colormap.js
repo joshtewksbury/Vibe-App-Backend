@@ -21,19 +21,20 @@ class ColorMap {
     }
 }
 exports.ColorMap = ColorMap;
-// Updated heatmap colors to match venue status indicators:
-// 0.0-0.3 = QUIET (blue)
-// 0.3-0.6 = MODERATE (cyan/teal)
-// 0.6-0.8 = BUSY (yellow/orange)
-// 0.8-1.0 = VERY_BUSY (red)
-// SIGNIFICANTLY increased alpha values for much better visibility on map
+// Updated heatmap colors with better contrast for activity levels:
+// 0.0-0.2 = Very quiet (minimal/no blue)
+// 0.2-0.4 = QUIET (blue - cool colors)
+// 0.4-0.6 = MODERATE (cyan/teal - warming up)
+// 0.6-0.8 = BUSY (yellow/orange - hot)
+// 0.8-1.0 = VERY_BUSY (red/bright orange - very hot)
 ColorMap.HEAT_COLORS = [
     { t: 0.0, r: 0, g: 0, b: 0, a: 0 }, // Transparent (no activity)
-    { t: 0.1, r: 70, g: 130, b: 255, a: 200 }, // Light blue (minimal activity) - boosted from 140
-    { t: 0.3, r: 0, g: 150, b: 255, a: 220 }, // Blue (QUIET - matches status) - boosted from 180
-    { t: 0.5, r: 0, g: 200, b: 200, a: 240 }, // Cyan (MODERATE - matches status) - boosted from 200
-    { t: 0.7, r: 255, g: 200, b: 0, a: 250 }, // Yellow (BUSY - matches status) - boosted from 220
-    { t: 0.85, r: 255, g: 120, b: 0, a: 255 }, // Orange (approaching VERY_BUSY) - boosted from 240
-    { t: 1.0, r: 255, g: 50, b: 50, a: 255 } // Red (VERY_BUSY - matches status)
+    { t: 0.05, r: 50, g: 80, b: 200, a: 120 }, // Very faint blue (minimal activity)
+    { t: 0.2, r: 80, g: 120, b: 255, a: 180 }, // Light blue (quiet)
+    { t: 0.4, r: 0, g: 180, b: 255, a: 220 }, // Blue (QUIET - cool)
+    { t: 0.6, r: 0, g: 220, b: 180, a: 240 }, // Cyan/Teal (MODERATE - warming)
+    { t: 0.75, r: 255, g: 220, b: 0, a: 250 }, // Yellow (BUSY - hot)
+    { t: 0.88, r: 255, g: 140, b: 0, a: 255 }, // Orange (VERY BUSY - very hot)
+    { t: 1.0, r: 255, g: 40, b: 40, a: 255 } // Bright Red (EXTREMELY BUSY - hottest)
 ];
 //# sourceMappingURL=colormap.js.map

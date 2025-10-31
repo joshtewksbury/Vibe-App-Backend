@@ -1,4 +1,4 @@
-import { HeatMapVenue, GridResponse } from '../types/heatmap';
+import { HeatMapVenue, GridResponse } from '../shared/types/heatmap';
 declare class HeatMapTileService {
     private getVenueHash;
     getTile(z: number, x: number, y: number, venues: HeatMapVenue[]): Promise<Buffer>;

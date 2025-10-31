@@ -6,12 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const client_1 = require("@prisma/client");
-const errorHandler_1 = require("../middleware/errorHandler");
-const auth_1 = require("../middleware/auth");
-const validation_1 = require("../utils/validation");
+const errorHandler_1 = require("../shared/middleware/errorHandler");
+const auth_1 = require("../shared/middleware/auth");
+const validation_1 = require("../shared/utils/validation");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const router = express_1.default.Router();
-const prisma = new client_1.PrismaClient();
 // Sign up
 router.post('/signup', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { error, value } = (0, validation_1.validateSignUp)(req.body);
@@ -20,7 +19,7 @@ router.post('/signup', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     }
     const { email, password, firstName, lastName } = value;
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma_1.default.user.findUnique({
         where: { email: email.toLowerCase() }
     });
     if (existingUser) {
@@ -30,7 +29,7 @@ router.post('/signup', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const saltRounds = parseInt(process.env.BCRYPT_ROUNDS || '12');
     const passwordHash = await bcryptjs_1.default.hash(password, saltRounds);
     // Create user
-    const user = await prisma.user.create({
+    const user = await prisma_1.default.user.create({
         data: {
             email: email.toLowerCase(),
             firstName,
@@ -66,7 +65,7 @@ router.post('/signin', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     }
     const { email, password } = value;
     // Find user
-    const user = await prisma.user.findUnique({
+    const user = await prisma_1.default.user.findUnique({
         where: { email: email.toLowerCase() }
     });
     if (!user) {
@@ -83,7 +82,7 @@ router.post('/signin', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     }
     const token = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
     // Update last active time
-    await prisma.user.update({
+    await prisma_1.default.user.update({
         where: { id: user.id },
         data: { lastActiveAt: new Date() }
     });
@@ -125,7 +124,7 @@ router.post('/refresh', auth_1.authMiddleware, (0, errorHandler_1.asyncHandler)(
 }));
 // Get current user profile
 router.get('/me', auth_1.authMiddleware, (0, errorHandler_1.asyncHandler)(async (req, res) => {
-    const user = await prisma.user.findUnique({
+    const user = await prisma_1.default.user.findUnique({
         where: { id: req.user.id },
         select: {
             id: true,

@@ -42,15 +42,19 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const dotenv_1 = require("dotenv");
-const client_1 = require("@prisma/client");
 const Sentry = __importStar(require("@sentry/node"));
-const auth_1 = require("./middleware/auth");
-const rateLimiting_1 = require("./middleware/rateLimiting");
-const errorHandler_1 = require("./middleware/errorHandler");
-const auditLogger_1 = require("./middleware/auditLogger");
+const auth_1 = require("./shared/middleware/auth");
+const rateLimiting_1 = require("./shared/middleware/rateLimiting");
+const errorHandler_1 = require("./shared/middleware/errorHandler");
+const auditLogger_1 = require("./shared/middleware/auditLogger");
 const tilePrecomputeService_1 = require("./services/tilePrecomputeService");
-// Route imports
-const auth_2 = __importDefault(require("./routes/auth"));
+const prisma_1 = __importDefault(require("./lib/prisma"));
+exports.prisma = prisma_1.default;
+// Module route imports (new modular structure)
+const auth_routes_1 = __importDefault(require("./modules/auth/auth.routes"));
+const friends_routes_1 = __importDefault(require("./modules/friends/friends.routes"));
+const messaging_routes_1 = __importDefault(require("./modules/messaging/messaging.routes"));
+// Legacy route imports (to be refactored)
 const venues_1 = __importDefault(require("./routes/venues"));
 const venueImages_1 = __importDefault(require("./routes/venueImages"));
 const users_1 = __importDefault(require("./routes/users"));
@@ -58,16 +62,14 @@ const feed_1 = __importDefault(require("./routes/feed"));
 const heatmap_1 = __importDefault(require("./routes/heatmap"));
 const images_1 = __importDefault(require("./routes/images"));
 const imageProxy_1 = __importDefault(require("./routes/imageProxy"));
-const friends_1 = __importDefault(require("./routes/friends"));
-const messages_1 = __importDefault(require("./routes/messages"));
 const posts_1 = __importDefault(require("./routes/posts"));
 const stories_1 = __importDefault(require("./routes/stories"));
+const accountSettings_1 = __importDefault(require("./routes/accountSettings"));
+const events_1 = __importDefault(require("./routes/events"));
 // Load environment variables
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
 exports.app = app;
-const prisma = new client_1.PrismaClient();
-exports.prisma = prisma;
 const PORT = process.env.PORT || 3000;
 // Initialize Sentry for error tracking (production only)
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
@@ -112,7 +114,7 @@ app.use(auditLogger_1.auditLogger);
 app.get('/health', async (req, res) => {
     try {
         // Test database connection
-        await prisma.$queryRaw `SELECT 1`;
+        await prisma_1.default.$queryRaw `SELECT 1`;
         res.status(200).json({
             status: 'healthy',
             timestamp: new Date().toISOString(),
@@ -133,17 +135,19 @@ app.get('/health', async (req, res) => {
     }
 });
 // API routes
-app.use('/auth', auth_2.default);
+app.use('/auth', auth_routes_1.default);
 app.use('/venues', venues_1.default); // Venues endpoint now public (no auth required)
 app.use('/', venueImages_1.default); // Image routes include their own auth middleware
 app.use('/image-proxy', imageProxy_1.default); // Image proxy for external images (Instagram, etc)
 app.use('/users', users_1.default); // Users endpoint now public for search (individual routes can add auth as needed)
 app.use('/feed', auth_1.authMiddleware, feed_1.default);
 app.use('/heatmap', heatmap_1.default); // Heat map routes include their own auth middleware
-app.use('/friends', friends_1.default); // Friends routes include their own auth middleware
-app.use('/messages', messages_1.default); // Messages routes include their own auth middleware
+app.use('/friends', friends_routes_1.default); // Friends routes include their own auth middleware
+app.use('/messages', messaging_routes_1.default); // Messages routes include their own auth middleware
 app.use('/posts', posts_1.default); // Posts routes include their own auth middleware
 app.use('/stories', stories_1.default); // Stories routes include their own auth middleware
+app.use('/account', accountSettings_1.default); // Account settings routes with auth
+app.use('/events', events_1.default); // Events routes with auth
 // Sentry error handler must be registered before other error handlers
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
     app.use(Sentry.expressErrorHandler());
@@ -161,13 +165,13 @@ app.use((req, res) => {
 process.on('SIGINT', async () => {
     console.log('Received SIGINT. Graceful shutdown...');
     tilePrecomputeService_1.tilePrecomputeService.stopBackgroundRefresh();
-    await prisma.$disconnect();
+    await prisma_1.default.$disconnect();
     process.exit(0);
 });
 process.on('SIGTERM', async () => {
     console.log('Received SIGTERM. Graceful shutdown...');
     tilePrecomputeService_1.tilePrecomputeService.stopBackgroundRefresh();
-    await prisma.$disconnect();
+    await prisma_1.default.$disconnect();
     process.exit(0);
 });
 app.use(images_1.default);

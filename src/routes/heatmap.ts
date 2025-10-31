@@ -1,14 +1,13 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import { heatmapTileService } from '../services/heatmapTileService';
 import { heatmapCacheService } from '../services/heatmapCacheService';
 import { kdeService } from '../services/kdeService';
 import { heatmapConfig } from '../config/heatmap';
-import { authMiddleware, AuthenticatedRequest } from '../middleware/auth';
-import { HeatMapVenue } from '../types/heatmap';
+import { authMiddleware, AuthenticatedRequest } from '../shared/middleware/auth';
+import { HeatMapVenue } from '../shared/types/heatmap';
+import prisma from '../lib/prisma';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Convert venue database model to heat map format
 function convertVenueToHeatMap(venue: any): HeatMapVenue {

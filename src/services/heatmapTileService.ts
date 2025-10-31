@@ -1,13 +1,11 @@
 import sharp from 'sharp';
-import { PrismaClient } from '@prisma/client';
 import { kdeService } from './kdeService';
 import { heatmapCacheService } from './heatmapCacheService';
-import { ColorMap } from '../utils/colormap';
+import { ColorMap } from '../shared/utils/colormap';
 import { heatmapConfig } from '../config/heatmap';
-import { HeatMapVenue, GridResponse } from '../types/heatmap';
+import { HeatMapVenue, GridResponse } from '../shared/types/heatmap';
 import crypto from 'crypto';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 class HeatMapTileService {
   // Generate hash of venue data to detect changes

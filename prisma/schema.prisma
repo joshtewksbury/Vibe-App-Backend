@@ -51,6 +51,10 @@ model User {
   encryptedPrivateKey String?
   keyCreatedAt     DateTime?
 
+  // Account Settings
+  settings         UserSettings?
+  deletionRequest  AccountDeletionRequest?
+
   @@map("users")
 }
 
@@ -200,18 +204,69 @@ model Event {
   description String
   startTime   DateTime
   endTime     DateTime
-  ticketPrice Float?
+  ticketPrice String?   // Changed to String to support "Free", "$20-50", etc.
   capacity    Int?
   eventType   String
   imageUrl    String?
   isActive    Boolean   @default(true)
+
+  // External event integration
+  source      EventSource @default(USER_CREATED) // Ticketmaster, Eventbrite, or user-created
+  externalId  String?     // External API ID (e.g., "tm_123" or "eb_456")
+  ticketURL   String?     // External ticket purchase URL
+  artist      String?     // For music events
+  genre       String?     // Music genre
+
+  // Additional fields
+  isRecurring Boolean   @default(false)
+  recurringDays String[]  // e.g., ["MON", "WED", "FRI"]
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   venue     Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
   createdBy User  @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
+  rsvps     EventRSVP[]
+  reminders EventReminder[]
+
   @@map("events")
+  @@index([venueId])
+  @@index([startTime])
+  @@index([source])
+}
+
+model EventRSVP {
+  id        String       @id @default(cuid())
+  eventId   String
+  userId    String
+  status    RSVPStatus   @default(GOING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId]) // One RSVP per user per event
+  @@map("event_rsvps")
+  @@index([userId])
+  @@index([eventId])
+}
+
+model EventReminder {
+  id         String   @id @default(cuid())
+  eventId    String
+  userId     String
+  reminderAt DateTime // When to send the reminder
+  notified   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId]) // One reminder per user per event
+  @@map("event_reminders")
+  @@index([userId])
+  @@index([reminderAt])
+  @@index([notified])
 }
 
 model Story {
@@ -560,4 +615,151 @@ model HeatMapTile {
   @@index([z])
   @@index([expiresAt])
   @@index([venueHash])
+}
+
+// User Settings & Privacy Models
+model UserSettings {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  // Notification Preferences
+  pushNotificationsEnabled Boolean @default(true)
+  emailNotificationsEnabled Boolean @default(true)
+
+  // Notification Types
+  notifyOnNewMessage       Boolean @default(true)
+  notifyOnFriendRequest    Boolean @default(true)
+  notifyOnPostLike         Boolean @default(true)
+  notifyOnPostComment      Boolean @default(true)
+  notifyOnEventReminder    Boolean @default(true)
+  notifyOnNearbyFriends    Boolean @default(true)
+  notifyOnVenueDeals       Boolean @default(false)
+
+  // Privacy Settings
+  profileVisibility        ProfileVisibility @default(PUBLIC)
+  locationSharingEnabled   Boolean @default(false)
+  showOnlineStatus         Boolean @default(true)
+  allowFriendRequests      Boolean @default(true)
+  allowMessageRequests     Boolean @default(true)
+
+  // App Preferences
+  darkModeEnabled          Boolean @default(false)
+  language                 String @default("en")
+  distanceUnit             DistanceUnit @default(KILOMETERS)
+
+  // Data & Storage
+  autoDownloadMedia        Boolean @default(true)
+  saveStoriesAutomatically Boolean @default(false)
+
+  // Legal & Compliance
+  termsAcceptedAt          DateTime?
+  termsAcceptedVersion     String?
+  privacyPolicyAcceptedAt  DateTime?
+  privacyPolicyAcceptedVersion String?
+  marketingEmailsConsent   Boolean @default(false)
+  dataCollectionConsent    Boolean @default(true)
+  ageVerified              Boolean @default(false)
+  ageVerifiedAt            DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+  @@index([userId])
+}
+
+model BlockedUser {
+  id          String   @id @default(cuid())
+  userId      String   // User who blocked
+  blockedUserId String // User who was blocked
+  reason      String?  // Optional reason for blocking
+  blockedAt   DateTime @default(now())
+
+  @@unique([userId, blockedUserId])
+  @@map("blocked_users")
+  @@index([userId])
+  @@index([blockedUserId])
+}
+
+model AccountDeletionRequest {
+  id             String              @id @default(cuid())
+  userId         String              @unique
+  requestedAt    DateTime            @default(now())
+  scheduledFor   DateTime            // When account will be deleted (30 days from request)
+  status         DeletionStatus      @default(PENDING)
+  reason         String?             // Optional reason for deletion
+  cancelledAt    DateTime?
+  completedAt    DateTime?
+  dataExported   Boolean             @default(false)
+  dataExportedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account_deletion_requests")
+  @@index([userId])
+  @@index([scheduledFor])
+  @@index([status])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model LoginHistory {
+  id         String   @id @default(cuid())
+  userId     String
+  ipAddress  String
+  userAgent  String
+  location   String?  // City, Country from IP
+  deviceType String?  // iOS, Android, Web
+  success    Boolean
+  failReason String?  // If login failed, reason
+  createdAt  DateTime @default(now())
+
+  @@map("login_history")
+  @@index([userId])
+  @@index([createdAt])
+  @@index([success])
+}
+
+// Additional Enums for Settings
+enum ProfileVisibility {
+  PUBLIC       // Anyone can see profile
+  FRIENDS_ONLY // Only friends can see profile
+  PRIVATE      // Only user can see profile
+}
+
+enum DistanceUnit {
+  KILOMETERS
+  MILES
+}
+
+enum DeletionStatus {
+  PENDING      // Deletion requested, waiting for grace period
+  CANCELLED    // User cancelled deletion
+  COMPLETED    // Account deleted
+}
+
+enum EventSource {
+  USER_CREATED  // Event created by venue or user
+  TICKETMASTER  // Synced from Ticketmaster API
+  EVENTBRITE    // Synced from Eventbrite API
+}
+
+enum RSVPStatus {
+  GOING         // User confirmed attending
+  INTERESTED    // User marked as interested
+  NOT_GOING     // User declined
 }
