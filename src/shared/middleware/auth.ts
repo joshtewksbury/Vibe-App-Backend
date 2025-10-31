@@ -15,6 +15,31 @@ export interface AuthenticatedRequest extends Request {
 // Alias for compatibility
 export type AuthRequest = AuthenticatedRequest;
 
+// Simple in-memory cache for user data to reduce database queries
+// Cache user data for 5 minutes to balance freshness and performance
+interface CachedUser {
+  user: {
+    id: string;
+    email: string;
+    role: string;
+    venueIds: string[];
+  };
+  timestamp: number;
+}
+
+const userCache = new Map<string, CachedUser>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+// Clean up old cache entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [userId, cached] of userCache.entries()) {
+    if (now - cached.timestamp > CACHE_TTL) {
+      userCache.delete(userId);
+    }
+  }
+}, 60 * 1000); // Clean every minute
+
 export const authMiddleware = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -43,34 +68,67 @@ export const authMiddleware = async (
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
 
-    // Get user from database to ensure they still exist and get latest data
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        venueIds: true,
-        lastActiveAt: true
-      }
-    });
+    // Check cache first to avoid database query
+    const now = Date.now();
+    const cached = userCache.get(decoded.userId);
 
-    if (!user) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'User not found'
+    let user: {
+      id: string;
+      email: string;
+      role: string;
+      venueIds: string[];
+      lastActiveAt?: Date;
+    };
+
+    if (cached && (now - cached.timestamp) < CACHE_TTL) {
+      // Use cached data
+      user = cached.user;
+    } else {
+      // Get user from database
+      const dbUser = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          venueIds: true,
+          lastActiveAt: true
+        }
+      });
+
+      if (!dbUser) {
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'User not found'
+        });
+      }
+
+      user = dbUser;
+
+      // Update cache
+      userCache.set(decoded.userId, {
+        user: {
+          id: dbUser.id,
+          email: dbUser.email,
+          role: dbUser.role,
+          venueIds: dbUser.venueIds
+        },
+        timestamp: now
       });
     }
 
     // Update last active time only if it's been more than 1 hour
     // This prevents a database write on every request, improving performance
-    const shouldUpdate = (Date.now() - user.lastActiveAt.getTime()) / (1000 * 60 * 60) >= 1;
-    if (shouldUpdate) {
-      // Fire and forget - don't await to avoid blocking the request
-      prisma.user.update({
-        where: { id: user.id },
-        data: { lastActiveAt: new Date() }
-      }).catch(err => console.error('Failed to update lastActiveAt:', err));
+    // Only update if we have lastActiveAt (from database, not cache)
+    if (user.lastActiveAt) {
+      const shouldUpdate = (Date.now() - user.lastActiveAt.getTime()) / (1000 * 60 * 60) >= 1;
+      if (shouldUpdate) {
+        // Fire and forget - don't await to avoid blocking the request
+        prisma.user.update({
+          where: { id: user.id },
+          data: { lastActiveAt: new Date() }
+        }).catch(err => console.error('Failed to update lastActiveAt:', err));
+      }
     }
 
     // Attach user to request
