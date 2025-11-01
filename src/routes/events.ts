@@ -744,10 +744,13 @@ router.post('/sync-external', authMiddleware, async (req: AuthRequest, res) => {
         }
 
         // Create event
+        // For automated events (API key auth), don't set createdById
+        const isApiKeyAuth = req.user!.userId === 'admin-api-key';
+
         const event = await prisma.event.create({
             data: {
                 venueId,
-                createdById: req.user!.userId,
+                ...(isApiKeyAuth ? {} : { createdById: req.user!.userId }),
                 externalId,
                 source: source as EventSource,
                 title,

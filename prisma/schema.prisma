@@ -199,7 +199,7 @@ model Deal {
 model Event {
   id          String    @id @default(cuid())
   venueId     String
-  createdById String
+  createdById String?   // Optional for automated events (N8N scraper)
   title       String
   description String
   startTime   DateTime
@@ -225,7 +225,7 @@ model Event {
   updatedAt   DateTime  @updatedAt
 
   venue     Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
-  createdBy User  @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   rsvps     EventRSVP[]
   reminders EventReminder[]
