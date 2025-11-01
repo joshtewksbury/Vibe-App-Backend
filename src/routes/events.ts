@@ -769,7 +769,9 @@ router.post('/sync-external', authMiddleware, async (req: AuthRequest, res) => {
             event,
         });
     } catch (error) {
-        console.error('Error syncing external event:', error);
+        console.error('❌ Error syncing external event:', error);
+        console.error('❌ Error details:', JSON.stringify(error, null, 2));
+        console.error('❌ Request body:', JSON.stringify(req.body, null, 2));
         res.status(500).json({ success: false, message: 'Failed to sync event' });
     }
 });
