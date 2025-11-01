@@ -720,7 +720,7 @@ router.post('/sync-external', authMiddleware, async (req: AuthRequest, res) => {
             });
         }
 
-        if (!['TICKETMASTER', 'EVENTBRITE'].includes(source)) {
+        if (!['TICKETMASTER', 'EVENTBRITE', 'VENUE_WEBSITE'].includes(source)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid event source',

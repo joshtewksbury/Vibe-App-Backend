@@ -756,6 +756,7 @@ enum EventSource {
   USER_CREATED  // Event created by venue or user
   TICKETMASTER  // Synced from Ticketmaster API
   EVENTBRITE    // Synced from Eventbrite API
+  VENUE_WEBSITE // Scraped from venue website via N8N
 }
 
 enum RSVPStatus {
