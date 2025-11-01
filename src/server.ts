@@ -9,6 +9,7 @@ import { rateLimitMiddleware } from './shared/middleware/rateLimiting';
 import { errorHandler } from './shared/middleware/errorHandler';
 import { auditLogger } from './shared/middleware/auditLogger';
 import { tilePrecomputeService } from './services/tilePrecomputeService';
+import { busynessScheduler } from './services/busynessScheduler';
 import prisma from './lib/prisma';
 
 // Module route imports (new modular structure)
@@ -141,6 +142,7 @@ app.use((req, res) => {
 process.on('SIGINT', async () => {
   console.log('Received SIGINT. Graceful shutdown...');
   tilePrecomputeService.stopBackgroundRefresh();
+  busynessScheduler.stop();
   await prisma.$disconnect();
   process.exit(0);
 });
@@ -148,6 +150,7 @@ process.on('SIGINT', async () => {
 process.on('SIGTERM', async () => {
   console.log('Received SIGTERM. Graceful shutdown...');
   tilePrecomputeService.stopBackgroundRefresh();
+  busynessScheduler.stop();
   await prisma.$disconnect();
   process.exit(0);
 });
@@ -161,6 +164,10 @@ app.listen(PORT, () => {
   // Start background tile precomputation and refresh
   console.log('🔥 Starting heat map tile precomputation service...');
   tilePrecomputeService.startBackgroundRefresh();
+
+  // Start live busyness data scheduler
+  console.log('📊 Starting live busyness data scheduler (15-minute intervals)...');
+  busynessScheduler.start();
 });
 
 export { app, prisma };

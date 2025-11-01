@@ -10,6 +10,7 @@ import {
 } from '../shared/utils/validation';
 import { SerpAPIService } from '../services/serpApi';
 import { GooglePlacesService } from '../services/googlePlaces';
+import { busynessScheduler } from '../services/busynessScheduler';
 import { calculateVenueStatus, getStatusColor } from '../shared/utils/venueStatusColors';
 import prisma from '../lib/prisma';
 
@@ -283,10 +284,17 @@ router.get('/:id/busy', asyncHandler(async (req, res) => {
     orderBy: { timestamp: 'asc' }
   });
 
+  // Determine the actual last updated time
+  const lastSnapshotTime = snapshots.length > 0
+    ? snapshots[snapshots.length - 1].timestamp
+    : null;
+
   res.json({
     venueId: id,
     snapshots,
-    lastUpdated: new Date()
+    lastUpdated: lastSnapshotTime || new Date(),
+    popularTimes: venue.popularTimes || null, // Include popular times as fallback
+    hasLiveData: snapshots.length > 0
   });
 }));
 
@@ -688,5 +696,58 @@ async function ensurePopularTimes(venue: any): Promise<any> {
 
   return venue;
 }
+
+// POST /venues/refresh-live-busyness - Manually trigger live busyness refresh
+router.post('/refresh-live-busyness', requireRole(['ADMIN']), asyncHandler(async (req: AuthenticatedRequest, res) => {
+  console.log('🔄 Manual live busyness refresh triggered by admin');
+
+  // Trigger refresh in background
+  busynessScheduler.triggerRefresh().catch(err => {
+    console.error('Error in manual refresh:', err);
+  });
+
+  res.json({
+    message: 'Live busyness refresh triggered',
+    timestamp: new Date().toISOString()
+  });
+}));
+
+// GET /venues/scheduler/status - Get busyness scheduler status
+router.get('/scheduler/status', requireRole(['ADMIN']), asyncHandler(async (req: AuthenticatedRequest, res) => {
+  // Get recent snapshots count
+  const recentSnapshots = await prisma.busySnapshot.count({
+    where: {
+      timestamp: {
+        gte: new Date(Date.now() - 60 * 60 * 1000) // Last hour
+      }
+    }
+  });
+
+  const totalSnapshots = await prisma.busySnapshot.count();
+
+  // Get latest snapshot
+  const latestSnapshot = await prisma.busySnapshot.findFirst({
+    orderBy: { timestamp: 'desc' },
+    include: {
+      venue: {
+        select: { name: true }
+      }
+    }
+  });
+
+  res.json({
+    status: 'running',
+    interval: '15 minutes',
+    snapshotsLastHour: recentSnapshots,
+    totalSnapshots,
+    latestSnapshot: latestSnapshot ? {
+      venueName: latestSnapshot.venue.name,
+      timestamp: latestSnapshot.timestamp,
+      status: latestSnapshot.status,
+      occupancyPercentage: latestSnapshot.occupancyPercentage,
+      source: latestSnapshot.source
+    } : null
+  });
+}));
 
 export default router;

@@ -9,6 +9,7 @@ const auth_1 = require("../shared/middleware/auth");
 const validation_1 = require("../shared/utils/validation");
 const serpApi_1 = require("../services/serpApi");
 const googlePlaces_1 = require("../services/googlePlaces");
+const busynessScheduler_1 = require("../services/busynessScheduler");
 const venueStatusColors_1 = require("../shared/utils/venueStatusColors");
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const router = express_1.default.Router();
@@ -254,10 +255,16 @@ router.get('/:id/busy', (0, errorHandler_1.asyncHandler)(async (req, res) => {
         },
         orderBy: { timestamp: 'asc' }
     });
+    // Determine the actual last updated time
+    const lastSnapshotTime = snapshots.length > 0
+        ? snapshots[snapshots.length - 1].timestamp
+        : null;
     res.json({
         venueId: id,
         snapshots,
-        lastUpdated: new Date()
+        lastUpdated: lastSnapshotTime || new Date(),
+        popularTimes: venue.popularTimes || null, // Include popular times as fallback
+        hasLiveData: snapshots.length > 0
     });
 }));
 // GET /venues/:id/busy/aggregates - Get venue busy aggregates
@@ -587,5 +594,51 @@ async function ensurePopularTimes(venue) {
     }
     return venue;
 }
+// POST /venues/refresh-live-busyness - Manually trigger live busyness refresh
+router.post('/refresh-live-busyness', (0, auth_1.requireRole)(['ADMIN']), (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    console.log('🔄 Manual live busyness refresh triggered by admin');
+    // Trigger refresh in background
+    busynessScheduler_1.busynessScheduler.triggerRefresh().catch(err => {
+        console.error('Error in manual refresh:', err);
+    });
+    res.json({
+        message: 'Live busyness refresh triggered',
+        timestamp: new Date().toISOString()
+    });
+}));
+// GET /venues/scheduler/status - Get busyness scheduler status
+router.get('/scheduler/status', (0, auth_1.requireRole)(['ADMIN']), (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    // Get recent snapshots count
+    const recentSnapshots = await prisma_1.default.busySnapshot.count({
+        where: {
+            timestamp: {
+                gte: new Date(Date.now() - 60 * 60 * 1000) // Last hour
+            }
+        }
+    });
+    const totalSnapshots = await prisma_1.default.busySnapshot.count();
+    // Get latest snapshot
+    const latestSnapshot = await prisma_1.default.busySnapshot.findFirst({
+        orderBy: { timestamp: 'desc' },
+        include: {
+            venue: {
+                select: { name: true }
+            }
+        }
+    });
+    res.json({
+        status: 'running',
+        interval: '15 minutes',
+        snapshotsLastHour: recentSnapshots,
+        totalSnapshots,
+        latestSnapshot: latestSnapshot ? {
+            venueName: latestSnapshot.venue.name,
+            timestamp: latestSnapshot.timestamp,
+            status: latestSnapshot.status,
+            occupancyPercentage: latestSnapshot.occupancyPercentage,
+            source: latestSnapshot.source
+        } : null
+    });
+}));
 exports.default = router;
 //# sourceMappingURL=venues.js.map

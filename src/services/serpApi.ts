@@ -8,6 +8,17 @@ export interface SerpPopularTimesData {
   source: string;
 }
 
+// Live busyness data from SerpAPI
+export interface SerpLiveBusynessData {
+  venueId: string;
+  venueName: string;
+  liveInfo: string;          // e.g., "Now: Usually not too busy"
+  timeSpent: string;          // e.g., "People typically spend 15 min to 1 hr here"
+  busynessScore: number;      // 0-100
+  timestamp: Date;
+  source: 'serp_live' | 'serp_estimated';
+}
+
 interface SerpAPIResponse {
   local_results?: Array<{
     title?: string;
@@ -20,6 +31,24 @@ interface SerpAPIResponse {
     };
   }>;
   status?: string;
+}
+
+interface SerpPlaceDetailsResponse {
+  place_results?: {
+    title?: string;
+    popular_times?: {
+      live_hash?: {
+        info?: string;        // "Now: Usually not too busy"
+        time_spent?: string;  // "People typically spend 15 min to 1 hr here"
+      };
+      graph_results?: any;
+    };
+    rating?: number;
+    reviews?: number;
+  };
+  search_metadata?: {
+    status?: string;
+  };
 }
 
 export class SerpAPIService {
@@ -98,6 +127,128 @@ export class SerpAPIService {
     } catch (error) {
       console.error('SerpAPI business hours error:', error);
       return null;
+    }
+  }
+
+  /**
+   * Fetch live busyness data using Google Place ID
+   * This provides real-time crowd information from Google Maps
+   */
+  async fetchLiveBusyness(placeId: string, venueName: string): Promise<SerpLiveBusynessData | null> {
+    if (!this.apiKey) {
+      console.warn('SerpAPI key not configured, skipping live busyness fetch');
+      return null;
+    }
+
+    try {
+      const params = {
+        engine: 'google_maps',
+        type: 'place',
+        place_id: placeId,
+        api_key: this.apiKey
+      };
+
+      console.log(`📡 Fetching live busyness for ${venueName} (${placeId})...`);
+      const response = await axios.get<SerpPlaceDetailsResponse>(this.baseURL, { params });
+
+      const placeResults = response.data.place_results;
+      const liveHash = placeResults?.popular_times?.live_hash;
+
+      if (liveHash && liveHash.info) {
+        // Extract busyness score from the live info text
+        const busynessScore = this.extractBusynessScore(liveHash.info);
+
+        return {
+          venueId: '', // Will be set by caller
+          venueName,
+          liveInfo: liveHash.info,
+          timeSpent: liveHash.time_spent || '',
+          busynessScore,
+          timestamp: new Date(),
+          source: 'serp_live'
+        };
+      }
+
+      console.log(`⚠️  No live busyness data available for ${venueName}`);
+      return null;
+    } catch (error) {
+      console.error(`❌ SerpAPI live busyness error for ${venueName}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Extract numeric busyness score from text descriptions
+   * Maps descriptive text to 0-100 scale
+   */
+  private extractBusynessScore(liveInfo: string): number {
+    const info = liveInfo.toLowerCase();
+
+    // Map text descriptions to scores
+    if (info.includes('as busy as it gets') || info.includes('usually as busy')) {
+      return 95;
+    } else if (info.includes('busier than usual')) {
+      return 85;
+    } else if (info.includes('a little busy')) {
+      return 65;
+    } else if (info.includes('not too busy')) {
+      return 35;
+    } else if (info.includes('quieter than usual')) {
+      return 20;
+    } else if (info.includes('not busy') || info.includes('quiet')) {
+      return 15;
+    }
+
+    // Default moderate busyness
+    return 50;
+  }
+
+  /**
+   * Fetch both live busyness and historical popular times in one call
+   */
+  async fetchCompleteBusynessData(placeId: string, venueName: string): Promise<{
+    liveData: SerpLiveBusynessData | null;
+    popularTimes: any;
+  }> {
+    if (!this.apiKey) {
+      console.warn('SerpAPI key not configured, skipping');
+      return { liveData: null, popularTimes: null };
+    }
+
+    try {
+      const params = {
+        engine: 'google_maps',
+        type: 'place',
+        place_id: placeId,
+        api_key: this.apiKey
+      };
+
+      const response = await axios.get<SerpPlaceDetailsResponse>(this.baseURL, { params });
+      const placeResults = response.data.place_results;
+
+      // Extract live data
+      let liveData: SerpLiveBusynessData | null = null;
+      const liveHash = placeResults?.popular_times?.live_hash;
+
+      if (liveHash && liveHash.info) {
+        liveData = {
+          venueId: '',
+          venueName,
+          liveInfo: liveHash.info,
+          timeSpent: liveHash.time_spent || '',
+          busynessScore: this.extractBusynessScore(liveHash.info),
+          timestamp: new Date(),
+          source: 'serp_live'
+        };
+      }
+
+      // Extract popular times
+      const popularTimes = placeResults?.popular_times || null;
+
+      return { liveData, popularTimes };
+    } catch (error) {
+      console.error(`❌ SerpAPI complete busyness error for ${venueName}:`, error);
+      return { liveData: null, popularTimes: null };
     }
   }
 
