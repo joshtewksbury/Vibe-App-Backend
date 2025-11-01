@@ -57,6 +57,19 @@ export const authMiddleware = async (
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
+    // Check if this is the admin API key (for N8N/automation tools)
+    if (process.env.ADMIN_API_KEY && token === process.env.ADMIN_API_KEY) {
+      // Create a synthetic admin user for API key authentication
+      req.user = {
+        id: 'admin-api-key',
+        userId: 'admin-api-key',
+        email: 'api@vibeapp.com',
+        role: 'ADMIN',
+        venueIds: []
+      };
+      return next();
+    }
+
     if (!process.env.JWT_SECRET) {
       console.error('JWT_SECRET not configured');
       return res.status(500).json({
