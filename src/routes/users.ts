@@ -1,10 +1,27 @@
 import express from 'express';
+import multer from 'multer';
 import { asyncHandler, createError } from '../shared/middleware/errorHandler';
 import { authMiddleware, AuthenticatedRequest } from '../shared/middleware/auth';
 import { validateUpdateUser } from '../shared/utils/validation';
+import { uploadFile } from '../services/cloudinaryService';
 import prisma from '../lib/prisma';
 
 const router = express.Router();
+
+// Configure multer for memory storage
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 // GET /users/search - Search for users (public endpoint for friend search)
 router.get('/search', asyncHandler(async (req, res) => {
@@ -46,6 +63,64 @@ router.get('/search', asyncHandler(async (req, res) => {
 
 // GET /users/me - Get current user profile (handled in auth routes)
 // This is just for organization, actual endpoint is in auth.ts
+
+// PATCH /users/profile - Update profile image
+router.patch('/profile', authMiddleware, upload.single('profileImage'), asyncHandler(async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+
+  if (!req.file) {
+    throw createError('No image file provided', 400);
+  }
+
+  console.log(`📤 Uploading profile image for user: ${userId}`);
+  console.log(`📦 File size: ${(req.file.size / 1024).toFixed(2)}KB`);
+
+  try {
+    // Upload to Cloudinary
+    const uploadResult = await uploadFile(
+      req.file.buffer,
+      'profile-images',
+      'image',
+      `profile_${userId}`
+    );
+
+    console.log(`✅ Uploaded to Cloudinary: ${uploadResult.secureUrl}`);
+
+    // Update user in database
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { profileImage: uploadResult.secureUrl },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        profileImage: true,
+        dateOfBirth: true,
+        gender: true,
+        musicPreferences: true,
+        venuePreferences: true,
+        goingOutFrequency: true,
+        location: true,
+        phoneNumber: true,
+        isEmailVerified: true,
+        createdAt: true,
+        lastActiveAt: true
+      }
+    });
+
+    console.log(`✅ Updated user profile image in database`);
+
+    res.json({
+      message: 'Profile image updated successfully',
+      profileImage: uploadResult.secureUrl,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('❌ Error uploading profile image:', error);
+    throw createError('Failed to upload profile image', 500);
+  }
+}));
 
 // PUT /users/me - Update current user profile
 router.put('/me', authMiddleware, asyncHandler(async (req: AuthenticatedRequest, res) => {

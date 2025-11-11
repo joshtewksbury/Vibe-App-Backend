@@ -4,11 +4,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const multer_1 = __importDefault(require("multer"));
 const errorHandler_1 = require("../shared/middleware/errorHandler");
 const auth_1 = require("../shared/middleware/auth");
 const validation_1 = require("../shared/utils/validation");
+const cloudinaryService_1 = require("../services/cloudinaryService");
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const router = express_1.default.Router();
+// Configure multer for memory storage
+const upload = (0, multer_1.default)({
+    storage: multer_1.default.memoryStorage(),
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        }
+        else {
+            cb(new Error('Only image files are allowed'));
+        }
+    }
+});
 // GET /users/search - Search for users (public endpoint for friend search)
 router.get('/search', (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { query } = req.query;
@@ -44,6 +61,52 @@ router.get('/search', (0, errorHandler_1.asyncHandler)(async (req, res) => {
 }));
 // GET /users/me - Get current user profile (handled in auth routes)
 // This is just for organization, actual endpoint is in auth.ts
+// PATCH /users/profile - Update profile image
+router.patch('/profile', auth_1.authMiddleware, upload.single('profileImage'), (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const userId = req.user.id;
+    if (!req.file) {
+        throw (0, errorHandler_1.createError)('No image file provided', 400);
+    }
+    console.log(`📤 Uploading profile image for user: ${userId}`);
+    console.log(`📦 File size: ${(req.file.size / 1024).toFixed(2)}KB`);
+    try {
+        // Upload to Cloudinary
+        const uploadResult = await (0, cloudinaryService_1.uploadFile)(req.file.buffer, 'profile-images', 'image', `profile_${userId}`);
+        console.log(`✅ Uploaded to Cloudinary: ${uploadResult.secureUrl}`);
+        // Update user in database
+        const updatedUser = await prisma_1.default.user.update({
+            where: { id: userId },
+            data: { profileImage: uploadResult.secureUrl },
+            select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                profileImage: true,
+                dateOfBirth: true,
+                gender: true,
+                musicPreferences: true,
+                venuePreferences: true,
+                goingOutFrequency: true,
+                location: true,
+                phoneNumber: true,
+                isEmailVerified: true,
+                createdAt: true,
+                lastActiveAt: true
+            }
+        });
+        console.log(`✅ Updated user profile image in database`);
+        res.json({
+            message: 'Profile image updated successfully',
+            profileImage: uploadResult.secureUrl,
+            user: updatedUser
+        });
+    }
+    catch (error) {
+        console.error('❌ Error uploading profile image:', error);
+        throw (0, errorHandler_1.createError)('Failed to upload profile image', 500);
+    }
+}));
 // PUT /users/me - Update current user profile
 router.put('/me', auth_1.authMiddleware, (0, errorHandler_1.asyncHandler)(async (req, res) => {
     const { error, value } = (0, validation_1.validateUpdateUser)(req.body);
