@@ -82,7 +82,8 @@ router.get('/conversations', authMiddleware, async (req: AuthRequest, res: Respo
         id: conversation.id,
         type: conversation.type,
         name: conversation.name,
-        participants: conversation.participants.map(p => p.user),
+        participants: conversation.participants.map(p => p.userId),
+        sharedEncryptionKey: conversation.sharedEncryptionKey,
         lastMessage: lastMessage ? {
           id: lastMessage.id,
           senderId: lastMessage.senderId,
@@ -91,7 +92,7 @@ router.get('/conversations', authMiddleware, async (req: AuthRequest, res: Respo
           iv: lastMessage.iv,
           authTag: lastMessage.authTag,
           messageType: lastMessage.messageType,
-          createdAt: lastMessage.createdAt
+          timestamp: lastMessage.createdAt
         } : null,
         lastActivity: conversation.updatedAt,
         unreadCount,
