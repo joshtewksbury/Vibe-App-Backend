@@ -36,6 +36,7 @@ model User {
   deals            Deal[]
   events           Event[]
   refreshTokens    RefreshToken[]
+  deviceTokens     DeviceToken[]
 
   // Friendship relations
   friendshipsInitiated Friendship[] @relation("FriendshipInitiator")
@@ -68,6 +69,21 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   // APNs device token
+  platform  String   @default("ios") // "ios" or "android"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, token])
+  @@map("device_tokens")
 }
 
 model Venue {

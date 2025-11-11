@@ -358,6 +358,61 @@ router.delete('/:friendshipId', authMiddleware, async (req: AuthRequest, res: Re
 });
 
 /**
+ * POST /friends/location/update
+ * Update location for all friendships at once
+ */
+router.post('/location/update', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { latitude, longitude, venueId, venueName, accuracy } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Validate location data
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Latitude and longitude required' });
+    }
+
+    // Update location for all accepted friendships where user is a participant
+    const locationData = {
+      latitude,
+      longitude,
+      venueId: venueId || null,
+      venueName: venueName || null,
+      timestamp: new Date().toISOString(),
+      accuracy: accuracy || 10.0
+    };
+
+    // Update all friendships where user is initiator or receiver
+    await prisma.friendship.updateMany({
+      where: {
+        OR: [
+          { initiatorId: userId, status: 'ACCEPTED' },
+          { receiverId: userId, status: 'ACCEPTED' }
+        ]
+      },
+      data: {
+        lastSharedLocation: locationData as any,
+        isLocationSharingEnabled: true
+      }
+    });
+
+    // Also update user's lastActiveAt to mark them as online
+    await prisma.user.update({
+      where: { id: userId },
+      data: { lastActiveAt: new Date() }
+    });
+
+    res.json({ success: true, location: locationData });
+  } catch (error) {
+    console.error('Error updating location:', error);
+    res.status(500).json({ error: 'Failed to update location' });
+  }
+});
+
+/**
  * POST /friends/:friendshipId/location
  * Share location with a friend
  */
@@ -456,6 +511,119 @@ router.post('/:friendshipId/location/disable', authMiddleware, async (req: AuthR
   } catch (error) {
     console.error('Error disabling location sharing:', error);
     res.status(500).json({ error: 'Failed to disable location sharing' });
+  }
+});
+
+/**
+ * GET /friends/nearby
+ * Get nearby online friends
+ */
+router.get('/nearby', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { latitude, longitude, radiusKm = 5 } = req.query;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: 'Latitude and longitude required' });
+    }
+
+    const userLat = parseFloat(latitude as string);
+    const userLon = parseFloat(longitude as string);
+    const radius = parseFloat(radiusKm as string);
+
+    // Get all accepted friendships
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        OR: [
+          { initiatorId: userId, status: 'ACCEPTED' },
+          { receiverId: userId, status: 'ACCEPTED' }
+        ],
+        isLocationSharingEnabled: true,
+        lastSharedLocation: { not: null }
+      },
+      include: {
+        initiator: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            profileImage: true,
+            location: true,
+            lastActiveAt: true
+          }
+        },
+        receiver: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            profileImage: true,
+            location: true,
+            lastActiveAt: true
+          }
+        }
+      }
+    });
+
+    // Filter for online friends within radius
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+    const nearbyFriends = friendships
+      .map(friendship => {
+        const friend = friendship.initiatorId === userId
+          ? friendship.receiver
+          : friendship.initiator;
+
+        const location = friendship.lastSharedLocation as any;
+
+        return {
+          id: friendship.id,
+          userId: userId,
+          friendId: friend.id,
+          friendUser: friend,
+          status: friendship.status,
+          requestedAt: friendship.createdAt,
+          acceptedAt: friendship.acceptedAt,
+          lastKnownLocation: location,
+          isLocationSharingEnabled: friendship.isLocationSharingEnabled,
+          lastSeen: friend.lastActiveAt
+        };
+      })
+      .filter(friend => {
+        // Check if online (active within last 5 minutes)
+        const isOnline = friend.lastSeen && new Date(friend.lastSeen) > fiveMinutesAgo;
+        if (!isOnline) return false;
+
+        // Check if location data exists
+        if (!friend.lastKnownLocation) return false;
+
+        // Calculate distance using Haversine formula
+        const friendLat = friend.lastKnownLocation.latitude;
+        const friendLon = friend.lastKnownLocation.longitude;
+
+        const R = 6371; // Earth's radius in km
+        const dLat = (friendLat - userLat) * Math.PI / 180;
+        const dLon = (friendLon - userLon) * Math.PI / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(userLat * Math.PI / 180) * Math.cos(friendLat * Math.PI / 180) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+
+        return distance <= radius;
+      });
+
+    res.json({ friends: nearbyFriends });
+  } catch (error) {
+    console.error('Error fetching nearby friends:', error);
+    res.status(500).json({ error: 'Failed to fetch nearby friends' });
   }
 });
 

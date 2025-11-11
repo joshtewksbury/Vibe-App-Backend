@@ -463,4 +463,168 @@ router.delete('/:postId', authMiddleware, async (req: AuthRequest, res: Response
   }
 });
 
+/**
+ * GET /posts/user/me
+ * Get posts created by the authenticated user
+ */
+router.get('/user/me', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: userId,
+        isActive: true
+      },
+      include: {
+        venue: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            venueIconUrl: true,
+            location: true
+          }
+        },
+        author: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profileImage: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    // Format posts to match iOS expectations
+    const formattedPosts = posts.map(post => ({
+      id: post.id,
+      authorId: post.authorId,
+      authorName: `${post.author.firstName} ${post.author.lastName}`,
+      authorProfileImage: post.author.profileImage || null,
+      authorType: post.authorType,
+      venueId: post.venueId,
+      venueName: post.venue?.name || null,
+      venueIcon: post.venue?.venueIconUrl || null,
+      postType: post.postType,
+      postStyle: post.postStyle,
+      title: post.title,
+      content: post.content,
+      imageURL: post.mediaUrl,
+      imageLayout: post.imageLayout,
+      timestamp: post.createdAt.toISOString(),
+      createdAt: post.createdAt.toISOString(),
+      likes: post.likes,
+      likesCount: post.likes,
+      isLiked: false,
+      comments: post.comments,
+      commentsCount: post.comments,
+      eventId: post.eventId,
+      dealId: post.dealId,
+      startTime: post.startTime?.toISOString() || null,
+      endTime: post.endTime?.toISOString() || null,
+      originalPrice: post.originalPrice,
+      discountPrice: post.discountPrice
+    }));
+
+    res.json({ posts: formattedPosts });
+  } catch (error) {
+    console.error('Error fetching user posts:', error);
+    res.status(500).json({ error: 'Failed to fetch user posts' });
+  }
+});
+
+/**
+ * GET /posts/liked
+ * Get posts liked by the authenticated user
+ */
+router.get('/liked', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Get posts liked by user
+    const likedPosts = await prisma.postLike.findMany({
+      where: {
+        userId: userId
+      },
+      include: {
+        post: {
+          include: {
+            venue: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+                venueIconUrl: true,
+                location: true
+              }
+            },
+            author: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                profileImage: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    // Format posts
+    const formattedPosts = likedPosts
+      .filter(like => like.post.isActive)
+      .map(like => ({
+        id: like.post.id,
+        authorId: like.post.authorId,
+        authorName: `${like.post.author.firstName} ${like.post.author.lastName}`,
+        authorProfileImage: like.post.author.profileImage || null,
+        authorType: like.post.authorType,
+        venueId: like.post.venueId,
+        venueName: like.post.venue?.name || null,
+        venueIcon: like.post.venue?.venueIconUrl || null,
+        postType: like.post.postType,
+        postStyle: like.post.postStyle,
+        title: like.post.title,
+        content: like.post.content,
+        imageURL: like.post.mediaUrl,
+        imageLayout: like.post.imageLayout,
+        timestamp: like.post.createdAt.toISOString(),
+        createdAt: like.post.createdAt.toISOString(),
+        likes: like.post.likes,
+        likesCount: like.post.likes,
+        isLiked: true,
+        comments: like.post.comments,
+        commentsCount: like.post.comments,
+        eventId: like.post.eventId,
+        dealId: like.post.dealId,
+        startTime: like.post.startTime?.toISOString() || null,
+        endTime: like.post.endTime?.toISOString() || null,
+        originalPrice: like.post.originalPrice,
+        discountPrice: like.post.discountPrice
+      }));
+
+    res.json({ posts: formattedPosts });
+  } catch (error) {
+    console.error('Error fetching liked posts:', error);
+    res.status(500).json({ error: 'Failed to fetch liked posts' });
+  }
+});
+
 export default router;

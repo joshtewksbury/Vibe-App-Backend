@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { authMiddleware, AuthRequest } from '../shared/middleware/auth';
 import { encryptMessage, decryptMessage } from '../shared/utils/encryption';
 import prisma from '../lib/prisma';
+import { sendMessageNotification } from '../services/pushNotificationService';
 
 const router = express.Router();
 
@@ -83,6 +84,14 @@ router.get('/conversations', authMiddleware, async (req: AuthRequest, res: Respo
         type: conversation.type,
         name: conversation.name,
         participants: conversation.participants.map(p => p.userId),
+        participantUsers: conversation.participants.map(p => ({
+          id: p.user.id,
+          email: p.user.email,
+          firstName: p.user.firstName,
+          lastName: p.user.lastName,
+          profileImage: p.user.profileImage,
+          lastActiveAt: p.user.lastActiveAt
+        })),
         sharedEncryptionKey: conversation.sharedEncryptionKey,
         lastMessage: lastMessage ? {
           id: lastMessage.id,
@@ -401,6 +410,19 @@ router.post('/send', authMiddleware, async (req: AuthRequest, res: Response) => 
       where: { id: conversationId },
       data: { updatedAt: new Date() }
     });
+
+    // Send push notification to recipient (don't await - send in background)
+    if (recipientId) {
+      sendMessageNotification(
+        recipientId,
+        `${message.sender.firstName} ${message.sender.lastName}`,
+        '[New Message]', // Encrypted, so we can't show preview
+        conversationId
+      ).catch(error => {
+        console.error('Failed to send push notification:', error);
+        // Don't fail the request if push notification fails
+      });
+    }
 
     res.status(201).json({ message });
   } catch (error) {
