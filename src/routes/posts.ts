@@ -76,6 +76,7 @@ router.get('/', async (req: Request, res: Response) => {
       id: post.id,
       authorId: post.authorId,
       authorName: `${post.author.firstName} ${post.author.lastName}`,
+      authorProfileImage: post.author.profileImage || null,
       authorType: post.authorType,
       venueId: post.venueId,
       venueName: post.venue?.name || null,
