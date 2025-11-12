@@ -107,6 +107,119 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Restore venue icons from Cloudinary (admin use only)
+app.post('/admin/restore-venue-icons', async (req, res) => {
+  try {
+    // Security: Only allow with correct admin key
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== process.env.ADMIN_SEED_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    console.log('🔄 Starting venue icon restoration...');
+
+    const { v2: cloudinary } = require('cloudinary');
+
+    // Configure Cloudinary
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    // Venue ID to Name mapping (from venue_icon_upload_results.json)
+    const venueMapping: Record<string, string> = {
+      '51': 'Indooroopilly Hotel', '40': 'Alfred & Constance', '10': 'Archive',
+      '28': 'Bar Pacino Brisbane', '12': 'Birdees', '6': 'Black Bear Lodge',
+      '25': 'Blackbird Brisbane', '56': 'Cloudland', '65': 'Darling & Co.',
+      '55': 'Death and Taxes Brisbane', '33': 'Eclipse Nightclub', '60': 'Empire Hotel',
+      '47': 'Enigma', '43': 'Felons Brewing Co', '26': 'Friday\'s Riverside Brisbane',
+      '48': 'Greaser', '1': 'Hey Chica', '5': 'Honky Tonks',
+      '29': 'Hotel West End', '2': 'Iris Rooftop', '14': 'Johnny Ringo\'s',
+      '39': 'Jubilee Hotel', '53': 'Lefty\'s Music Hall', '38': 'The Lobby Bar',
+      '15': 'Maya Rooftop Bar', '37': 'Mr Percival\'s', '64': 'Netherworld',
+      '31': 'The Newmarket Hotel', '16': 'Osbourne Hotel', '45': 'Pawn & Co Brisbane',
+      '11': 'Prohibition', '49': 'QA Hotel', '17': 'Regatta Hotel',
+      '34': 'Retros', '18': 'Rics Bar', '27': 'Riverbar & Kitchen Brisbane',
+      '24': 'Riverland Brisbane', '19': 'Royal Exchange Hotel', '13': 'Sixes and Sevens',
+      '20': 'Sixteen Antlers', '21': 'Soko', '7': 'Su Casa',
+      '59': 'Summer House', '22': 'The Tax Office', '4': 'The Beat',
+      '9': 'The Boundary', '54': 'The Caxton Hotel', '50': 'The Magee',
+      '3': 'The MET', '30': 'The Normanby Hotel', '52': 'The Paddo',
+      '41': 'The Star Brisbane', '36': 'The Tivoli', '35': 'The Triffid',
+      '58': 'The Wickham', '23': 'Warehouse 25', '46': 'Wonderland',
+      '44': 'El Camino Cantina Brisbane', '8': 'The Prince Consort Hotel',
+      '63': 'Brooklyn Standard', '42': 'Pig N Whistle', '57': 'The Story Bridge Hotel'
+    };
+
+    // Normalize name for matching
+    const normalizeName = (name: string) => name.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+
+    // Get all venues
+    const venues = await prisma.venue.findMany({
+      select: { id: true, name: true }
+    });
+
+    let updatedCount = 0;
+    const results: any[] = [];
+
+    for (const [venueId, venueName] of Object.entries(venueMapping)) {
+      const normalizedMappingName = normalizeName(venueName);
+
+      // Find matching venue
+      const matchingVenue = venues.find(v => {
+        const normalizedVenueName = normalizeName(v.name);
+        return normalizedVenueName === normalizedMappingName ||
+               normalizedVenueName.includes(normalizedMappingName) ||
+               normalizedMappingName.includes(normalizedVenueName);
+      });
+
+      if (matchingVenue) {
+        // Generate Cloudinary URL
+        const cloudinaryUrl = cloudinary.url(`venue-icons/${venueId}`, {
+          secure: true,
+          transformation: [
+            { width: 512, height: 512, crop: 'limit' },
+            { quality: 'auto', fetch_format: 'auto' }
+          ]
+        });
+
+        // Update venue
+        await prisma.venue.update({
+          where: { id: matchingVenue.id },
+          data: { venueIconUrl: cloudinaryUrl }
+        });
+
+        updatedCount++;
+        results.push({
+          venue: matchingVenue.name,
+          iconId: venueId,
+          url: cloudinaryUrl
+        });
+      }
+    }
+
+    console.log(`✅ Successfully restored ${updatedCount} venue icons!`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Venue icons restored successfully',
+      statistics: {
+        totalMappings: Object.keys(venueMapping).length,
+        updated: updatedCount
+      },
+      results: results.slice(0, 10) // Return first 10 as sample
+    });
+
+  } catch (error) {
+    console.error('❌ Error restoring venue icons:', error);
+    res.status(500).json({
+      error: 'Icon restoration failed',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Database seed endpoint (admin use only - secured with environment variable)
 app.post('/admin/seed-database', async (req, res) => {
   try {
