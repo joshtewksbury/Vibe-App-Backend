@@ -107,6 +107,111 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Database seed endpoint (admin use only - secured with environment variable)
+app.post('/admin/seed-database', async (req, res) => {
+  try {
+    // Security: Only allow seeding with correct admin key
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== process.env.ADMIN_SEED_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    console.log('🌱 Starting database seed...');
+
+    // Import seed function dynamically
+    const fs = require('fs');
+    const path = require('path');
+
+    // Read venues.json
+    const venuesPath = path.join(process.cwd(), 'venues.json');
+    const venuesData = JSON.parse(fs.readFileSync(venuesPath, 'utf8'));
+
+    console.log(`Seeding ${venuesData.venues.length} venues...`);
+
+    // Clear existing data
+    await prisma.busySnapshot.deleteMany();
+    await prisma.deal.deleteMany();
+    await prisma.event.deleteMany();
+    await prisma.post.deleteMany();
+    await prisma.story.deleteMany();
+    await prisma.venue.deleteMany();
+    console.log('Cleared existing venue data');
+
+    // Process each venue
+    let successCount = 0;
+    for (const venue of venuesData.venues) {
+      const venueData = {
+        name: venue.name,
+        category: venue.category,
+        location: venue.location,
+        latitude: venue.latitude,
+        longitude: venue.longitude,
+        capacity: venue.capacity,
+        currentOccupancy: venue.currentOccupancy || 0,
+        rating: venue.rating || null,
+        priceRange: venue.priceRange || venue.pricing?.tier || '$',
+        pricing: venue.pricing || null,
+        musicGenres: venue.musicGenres || [],
+        openingHours: venue.openingHours || {},
+        features: venue.features || [],
+        bookingURL: venue.bookingURL === 'PLACEHOLDER_URL' || venue.bookingURL === 'none' ? null : venue.bookingURL,
+        phoneNumber: venue.phoneNumber === 'PLACEHOLDER_PHONE' || venue.phoneNumber === 'none' ? null : venue.phoneNumber,
+        images: venue.images || [],
+        placeId: venue.placeId || null,
+        businessStatus: venue.businessStatus || 'OPERATIONAL'
+      };
+
+      const createdVenue = await prisma.venue.create({ data: venueData });
+
+      // Create busy snapshot
+      if (venue.currentOccupancy && venue.capacity) {
+        const occupancyPercentage = Math.round((venue.currentOccupancy / venue.capacity) * 100);
+        let status: 'QUIET' | 'MODERATE' | 'BUSY' | 'VERY_BUSY' | 'CLOSED';
+
+        if (occupancyPercentage < 25) status = 'QUIET';
+        else if (occupancyPercentage < 50) status = 'MODERATE';
+        else if (occupancyPercentage < 75) status = 'BUSY';
+        else status = 'VERY_BUSY';
+
+        await prisma.busySnapshot.create({
+          data: {
+            venueId: createdVenue.id,
+            occupancyCount: venue.currentOccupancy,
+            occupancyPercentage: occupancyPercentage,
+            status: status,
+            source: 'seed_data'
+          }
+        });
+      }
+
+      successCount++;
+    }
+
+    console.log(`✅ Successfully seeded ${successCount} venues!`);
+
+    // Get statistics
+    const venueCount = await prisma.venue.count();
+    const busySnapshotCount = await prisma.busySnapshot.count();
+
+    res.status(200).json({
+      success: true,
+      message: 'Database seeded successfully',
+      statistics: {
+        venues: venueCount,
+        busySnapshots: busySnapshotCount,
+        venuesProcessed: successCount
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error seeding database:', error);
+    res.status(500).json({
+      error: 'Seed failed',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // API routes
 app.use('/auth', authRoutes);
 app.use('/venues', venueRoutes); // Venues endpoint now public (no auth required)
