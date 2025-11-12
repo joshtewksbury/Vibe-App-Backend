@@ -20,7 +20,7 @@ const googlePlacesService = new GooglePlacesService();
 
 // GET /venues - Get all venues with optional filtering
 router.get('/', asyncHandler(async (req: Request, res: Response) => {
-  const { lat, lng, radius = 10000, category, limit = 50, offset = 0 } = req.query;
+  const { lat, lng, radius = 10000, category, limit = 500, offset = 0 } = req.query;
 
   let whereClause: any = {};
   let orderBy: any = { name: 'asc' };
