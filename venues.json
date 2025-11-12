@@ -32,7 +32,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "http://www.heychica.com.au/",
       "phoneNumber": "(07) 3166 2472",
       "images": [],
@@ -92,7 +105,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://irisrooftop.com.au/",
       "phoneNumber": "(07) 3131 8999",
       "images": [],
@@ -152,7 +178,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "http://www.themetbrisbane.com/",
       "phoneNumber": null,
       "images": [],
@@ -212,7 +251,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "http://www.beatmegaclub.com.au/",
       "phoneNumber": "(07) 3852 2661",
       "images": [],
@@ -272,7 +324,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.honkytonks.com.au/",
       "phoneNumber": "0468 914 034",
       "images": [],
@@ -332,7 +397,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://blackbearlodge.bar/",
       "phoneNumber": null,
       "images": [],
@@ -392,7 +470,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": null,
       "phoneNumber": "(07) 3213 0000",
       "images": [],
@@ -452,7 +543,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://theprinceconsort.com.au/",
       "phoneNumber": "(07) 3252 4136",
       "images": [],
@@ -512,7 +616,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://theboundary.com.au/?utm_campaign=gmb&utm_medium=organic&utm_source=google&utm_term=plcid_11650544219139945112",
       "phoneNumber": "(07) 3844 6504",
       "images": [],
@@ -572,7 +689,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.archivebeerboutique.com.au/bookings",
       "phoneNumber": null,
       "images": [],
@@ -632,7 +762,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "http://www.prohibitionbrisbane.com.au/",
       "phoneNumber": "0478 189 396",
       "images": [],
@@ -692,7 +835,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://www.thebeaumontbrisbane.com.au/mainroom",
       "phoneNumber": "0494 373 544",
       "images": [],
@@ -752,7 +908,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.sixes.com.au/",
       "phoneNumber": "(07) 3358 6067",
       "images": [],
@@ -812,7 +981,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.johnnyringos.com.au/",
       "phoneNumber": "(07) 3073 1580",
       "images": [],
@@ -872,7 +1054,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.maya-mexican.com.au/",
       "phoneNumber": "(07) 3067 7447",
       "images": [],
@@ -932,7 +1127,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Rooftop",
+          "icon": "building"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://www.osbournehotel.com.au/",
       "phoneNumber": "(07) 3252 9833",
       "images": [],
@@ -992,7 +1200,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.regattahotel.com.au/?utm_source=google&utm_medium=organic&utm_campaign=gmb&utm_term=plcid_8168982521291519076",
       "phoneNumber": "(07) 3051 7617",
       "images": [],
@@ -1052,7 +1273,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://ricsbar.com.au/",
       "phoneNumber": "(07) 3252 2524",
       "images": [],
@@ -1112,7 +1346,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.rehotel.com.au/",
       "phoneNumber": "(07) 3371 2555",
       "images": [],
@@ -1172,7 +1419,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.sixteenantlers.com.au/",
       "phoneNumber": "0466 463 742",
       "images": [],
@@ -1232,7 +1492,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://sokobrisbane.com.au/",
       "phoneNumber": "(07) 3638 8270",
       "images": [],
@@ -1292,7 +1565,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "Multiple Rooms",
+          "icon": "building.2"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://thetaxoffice.au/",
       "phoneNumber": "(07) 3184 6762",
       "images": [],
@@ -1352,7 +1638,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Large Capacity",
+          "icon": "person.3"
+        },
+        {
+          "name": "Events",
+          "icon": "calendar"
+        }
+      ],
       "bookingURL": "http://www.warehousetwentyfive.com/",
       "phoneNumber": "0468 782 028",
       "images": [],
@@ -1412,7 +1711,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.riverlandbrisbane.com.au/",
       "phoneNumber": "(07) 3051 7655",
       "images": [],
@@ -1472,7 +1784,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://blackbirdbrisbane.com.au/",
       "phoneNumber": "(07) 3229 1200",
       "images": [],
@@ -1532,7 +1857,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.fridays.com.au/",
       "phoneNumber": "(07) 3051 7622",
       "images": [],
@@ -1592,7 +1930,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Full Menu",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Outdoor Dining",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.riverbarandkitchen.com.au/?utm_source=google&utm_medium=organic&utm_campaign=Google+My+Business&utm_content=Riverbar+and+Kitchen+-+Brisbane+City&_Kitchen_-_Brisbane_City=&utm_term=plcid_3952063502904263994",
       "phoneNumber": "(07) 3211 9020",
       "images": [],
@@ -1652,7 +2003,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://barpacino.com.au/",
       "phoneNumber": "(07) 3221 2397",
       "images": [],
@@ -1712,7 +2076,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Rooftop",
+          "icon": "building"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "http://hotelwestend.com.au/",
       "phoneNumber": "(07) 3840 9888",
       "images": [],
@@ -1772,7 +2149,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://thenormanby.com.au/?utm_source=google_business_profile&utm_medium=gbp_view_website&utm_campaign=gbp",
       "phoneNumber": "(07) 3831 3353",
       "images": [],
@@ -1832,7 +2222,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.thenewmarkethotel.com.au/",
       "phoneNumber": "(07) 3853 2000",
       "images": [],
@@ -1892,7 +2295,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Large Capacity",
+          "icon": "person.3"
+        },
+        {
+          "name": "Events",
+          "icon": "calendar"
+        }
+      ],
       "bookingURL": "https://pignwhistle.com.au/brunswick-street/",
       "phoneNumber": "(07) 3333 5545",
       "images": [],
@@ -1952,7 +2368,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://www.eclipsebrisbane.com.au/eclipse",
       "phoneNumber": "(07) 3213 0000",
       "images": [],
@@ -2012,7 +2441,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "http://www.retros.com.au/",
       "phoneNumber": "(07) 3166 2470",
       "images": [],
@@ -2072,7 +2514,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Large Capacity",
+          "icon": "person.3"
+        },
+        {
+          "name": "Events",
+          "icon": "calendar"
+        }
+      ],
       "bookingURL": "http://www.thetriffid.com.au/",
       "phoneNumber": "(07) 3171 3001",
       "images": [],
@@ -2132,7 +2587,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Large Capacity",
+          "icon": "person.3"
+        },
+        {
+          "name": "Events",
+          "icon": "calendar"
+        }
+      ],
       "bookingURL": "http://www.thetivoli.com.au/?utm_source=google&utm_medium=gmb&utm_campaign=seo",
       "phoneNumber": "(07) 3852 1711",
       "images": [],
@@ -2192,7 +2660,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.mrpercivals.com.au/",
       "phoneNumber": "(07) 3188 9090",
       "images": [],
@@ -2252,7 +2733,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://lobbybar.com.au/",
       "phoneNumber": "(07) 3607 5888",
       "images": [],
@@ -2312,7 +2806,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.jubileehotel.au/?utm_source=google&utm_medium=wix_google_business_profile&utm_campaign=2265686214607553076",
       "phoneNumber": "(07) 3252 4508",
       "images": [],
@@ -2372,7 +2879,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": null,
       "phoneNumber": null,
       "images": [],
@@ -2432,7 +2952,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Gaming",
+          "icon": "suit.diamond"
+        },
+        {
+          "name": "Multiple Bars",
+          "icon": "building.2"
+        },
+        {
+          "name": "Entertainment",
+          "icon": "star"
+        }
+      ],
       "bookingURL": "https://www.star.com.au/brisbane",
       "phoneNumber": "(07) 3306 8885",
       "images": [],
@@ -2492,7 +3025,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Full Menu",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Outdoor Dining",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://elcaminocantina.com.au/south-bank-brisbane/?utm_source=google&utm_medium=organic&utm_campaign=gmb&utm_content=south-bank",
       "phoneNumber": null,
       "images": [],
@@ -2552,7 +3098,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://felonsbrewingco.com.au/",
       "phoneNumber": "(07) 3188 9090",
       "images": [],
@@ -2612,7 +3171,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Large Capacity",
+          "icon": "person.3"
+        },
+        {
+          "name": "Events",
+          "icon": "calendar"
+        }
+      ],
       "bookingURL": "https://thebrightsidebrisbane.com.au/",
       "phoneNumber": null,
       "images": [],
@@ -2672,7 +3244,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.pawnandco.com.au/brisbane",
       "phoneNumber": "(07) 3195 4853",
       "images": [],
@@ -2732,7 +3317,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "http://www.wonderlandbne.com.au/",
       "phoneNumber": null,
       "images": [],
@@ -2792,7 +3390,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://enigmanc.com.au/",
       "phoneNumber": "(07) 3166 2474",
       "images": [],
@@ -2852,7 +3463,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://theprinceconsort.com.au/greaser/",
       "phoneNumber": "(07) 3648 9036",
       "images": [],
@@ -2912,7 +3536,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Rooftop",
+          "icon": "building"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://www.qahotel.com/",
       "phoneNumber": "(07) 3358 2799",
       "images": [],
@@ -2972,7 +3609,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": null,
       "phoneNumber": null,
       "images": [],
@@ -3032,7 +3682,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Beer Garden",
+          "icon": "leaf"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.indooroopillyhotel.com.au/",
       "phoneNumber": "(07) 3878 0111",
       "images": [],
@@ -3092,7 +3755,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.thepaddo.com.au/",
       "phoneNumber": "(07) 3369 0044",
       "images": [],
@@ -3152,7 +3828,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Large Capacity",
+          "icon": "person.3"
+        },
+        {
+          "name": "Events",
+          "icon": "calendar"
+        }
+      ],
       "bookingURL": "https://leftysmusichall.com.au/",
       "phoneNumber": "(07) 3924 8027",
       "images": [],
@@ -3212,7 +3901,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.caxton.com.au/",
       "phoneNumber": "(07) 3369 5544",
       "images": [],
@@ -3272,7 +3974,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.deathandtaxesbar.com.au/",
       "phoneNumber": null,
       "images": [],
@@ -3332,7 +4047,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://www.cloudland.tv/",
       "phoneNumber": "(07) 3872 6600",
       "images": [],
@@ -3392,7 +4120,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://royalgeorgehotel.com.au/",
       "phoneNumber": "(07) 3252 2524",
       "images": [],
@@ -3452,7 +4193,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.thewickham.com.au/?utm_source=google&utm_medium=organic&utm_campaign=gmb&utm_term=plcid_7860222285501297600",
       "phoneNumber": "(07) 3051 7621",
       "images": [],
@@ -3512,7 +4266,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://staysummerhouse.com/brisbane/",
       "phoneNumber": "(07) 3236 5007",
       "images": [],
@@ -3572,7 +4339,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Rooftop",
+          "icon": "building"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://www.empirehotel.com.au/",
       "phoneNumber": "(07) 3114 7440",
       "images": [],
@@ -3632,7 +4412,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://pignwhistle.com.au/indooroopilly/",
       "phoneNumber": "(07) 3878 8899",
       "images": [],
@@ -3692,7 +4485,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://pignwhistle.com.au/riverside/",
       "phoneNumber": "(07) 3832 9099",
       "images": [],
@@ -3752,7 +4558,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://pignwhistle.com.au/west-end/",
       "phoneNumber": "(07) 3062 2510",
       "images": [],
@@ -3812,7 +4631,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Arcade Games",
+          "icon": "gamecontroller"
+        },
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Fun Atmosphere",
+          "icon": "star"
+        }
+      ],
       "bookingURL": "https://www.netherworldarcade.com/",
       "phoneNumber": "0424 156 667",
       "images": [],
@@ -3872,7 +4704,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://darlingpaddington.com.au/",
       "phoneNumber": "(07) 3707 5400",
       "images": [],
@@ -3932,7 +4777,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "http://suziewongs.com.au/",
       "phoneNumber": null,
       "images": [],
@@ -3992,7 +4850,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "http://www.maggiemaybne.com.au/",
       "phoneNumber": "(07) 3166 2479",
       "images": [],
@@ -4052,7 +4923,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://micasafv.com.au/",
       "phoneNumber": "0410 242 014",
       "images": [],
@@ -4112,7 +4996,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": null,
       "phoneNumber": null,
       "images": [],
@@ -4172,7 +5069,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": "https://pressclub.net.au/",
       "phoneNumber": "(07) 3852 5000",
       "images": [],
@@ -4232,7 +5142,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Dance Floor",
+          "icon": "figure.dance"
+        },
+        {
+          "name": "DJ",
+          "icon": "music.note"
+        },
+        {
+          "name": "Late Night",
+          "icon": "moon.stars"
+        }
+      ],
       "bookingURL": null,
       "phoneNumber": "0426 828 615",
       "images": [],
@@ -4292,7 +5215,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.savilerowbar.com.au/",
       "phoneNumber": "0452 300 334",
       "images": [],
@@ -4352,7 +5288,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.thenixonroom.com/",
       "phoneNumber": null,
       "images": [],
@@ -4412,7 +5361,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Beer Garden",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://valleyhopsbrewing.com.au/",
       "phoneNumber": "(07) 3114 7447",
       "images": [],
@@ -4472,7 +5434,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.linarooftop.com.au/",
       "phoneNumber": "(07) 3187 4590",
       "images": [],
@@ -4532,7 +5507,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Beer Garden",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://littlemisssunshine.au/",
       "phoneNumber": "(07) 3544 6366",
       "images": [],
@@ -4592,7 +5580,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.barmiette.com.au/",
       "phoneNumber": "(07) 3524 2024",
       "images": [],
@@ -4652,7 +5653,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.stanslounge.com.au/",
       "phoneNumber": "(07) 3558 9418",
       "images": [],
@@ -4712,7 +5726,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://milquetoastwinebar.com.au/",
       "phoneNumber": "0420 740 514",
       "images": [],
@@ -4772,7 +5799,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.gorosbrisbane.com.au/",
       "phoneNumber": "(07) 3229 0229",
       "images": [],
@@ -4832,7 +5872,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.trovebrisbane.com.au/",
       "phoneNumber": "(07) 3221 4377",
       "images": [],
@@ -4892,7 +5945,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.star.com.au/brisbane/eat-and-drink/bars-and-clubs/cicada-blu",
       "phoneNumber": null,
       "images": [],
@@ -4952,7 +6018,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.frogshollow.com.au/",
       "phoneNumber": null,
       "images": [],
@@ -5012,7 +6091,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.clubfelix.com.au/",
       "phoneNumber": "(07) 3187 7816",
       "images": [],
@@ -5072,7 +6164,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.yokodining.com.au/",
       "phoneNumber": "(07) 3236 6582",
       "images": [],
@@ -5132,7 +6237,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.missd.com.au/",
       "phoneNumber": "(07) 3221 0032",
       "images": [],
@@ -5192,7 +6310,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://mybottler.com.au/",
       "phoneNumber": null,
       "images": [],
@@ -5252,7 +6383,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://scratchbar.com/",
       "phoneNumber": null,
       "images": [],
@@ -5312,7 +6456,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.instagram.com/makerbrisbane",
       "phoneNumber": null,
       "images": [],
@@ -5372,7 +6529,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "http://www.brooklynstandard.com.au/",
       "phoneNumber": "(07) 3221 1604",
       "images": [],
@@ -5432,7 +6602,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Cocktails",
+          "icon": "wineglass"
+        },
+        {
+          "name": "Live Music",
+          "icon": "music.mic"
+        },
+        {
+          "name": "Outdoor Area",
+          "icon": "leaf"
+        }
+      ],
       "bookingURL": "https://www.downunderbar.com.au/",
       "phoneNumber": null,
       "images": [],
@@ -5492,7 +6675,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.rangebrewing.com/",
       "phoneNumber": "(07) 3113 9058",
       "images": [],
@@ -5552,7 +6748,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.workingtitlebrew.co/",
       "phoneNumber": null,
       "images": [],
@@ -5612,7 +6821,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.greenbeacon.com.au/",
       "phoneNumber": "0460 408 697",
       "images": [],
@@ -5672,7 +6894,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.workingtitlebrew.co/",
       "phoneNumber": null,
       "images": [],
@@ -5732,7 +6967,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://catchmentbrewingco.com.au/",
       "phoneNumber": "(07) 3846 1701",
       "images": [],
@@ -5792,7 +7040,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "https://www.miltoncommon.com.au/",
       "phoneNumber": "(07) 3368 1608",
       "images": [],
@@ -5852,7 +7113,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "https://lmsbrewing.com.au/",
       "phoneNumber": "(07) 4357 8666",
       "images": [],
@@ -5912,7 +7186,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.caxtonstreetbrewing.com/",
       "phoneNumber": "(07) 3506 3656",
       "images": [],
@@ -5972,7 +7259,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.sealegsbrewing.com.au/",
       "phoneNumber": "0480 178 695",
       "images": [],
@@ -6032,7 +7332,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": null,
       "phoneNumber": null,
       "images": [],
@@ -6092,7 +7405,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "https://ballisticbeer.com/",
       "phoneNumber": "(07) 3277 6656",
       "images": [],
@@ -6152,7 +7478,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "https://www.whiteliesbrewing.com.au/",
       "phoneNumber": "(07) 3715 6679",
       "images": [],
@@ -6212,7 +7551,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://archerbrewing.com.au/",
       "phoneNumber": "0426 976 007",
       "images": [],
@@ -6272,7 +7624,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "https://www.futuremagic.com.au/",
       "phoneNumber": "(07) 3159 4954",
       "images": [],
@@ -6332,7 +7697,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.fuelbrewingco.com.au/",
       "phoneNumber": "(07) 3899 5470",
       "images": [],
@@ -6392,7 +7770,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.aetherbrewing.com.au/",
       "phoneNumber": "1800 325 013",
       "images": [],
@@ -6452,7 +7843,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.heliosbrewing.com.au/",
       "phoneNumber": "(07) 3392 9739",
       "images": [],
@@ -6512,7 +7916,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://slipstreambrewing.com.au/",
       "phoneNumber": "(07) 3892 4582",
       "images": [],
@@ -6572,7 +7989,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "https://easytimes.beer/",
       "phoneNumber": "0452 590 279",
       "images": [],
@@ -6632,7 +8062,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "https://www.brewdog.com/au/brisbane-fortitude-valley",
       "phoneNumber": "(07) 2139 8325",
       "images": [],
@@ -6692,7 +8135,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "https://www.brisbanebrewing.com.au/",
       "phoneNumber": "(07) 3891 1011",
       "images": [],
@@ -6752,7 +8208,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.allinnbrewingco.com/",
       "phoneNumber": "0478 519 414",
       "images": [],
@@ -6812,7 +8281,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "http://www.brendalebrewingco.com.au/",
       "phoneNumber": "0431 943 709",
       "images": [],
@@ -6872,7 +8354,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Craft Beer",
+          "icon": "mug"
+        },
+        {
+          "name": "Brewery Tours",
+          "icon": "building.2"
+        },
+        {
+          "name": "Food Available",
+          "icon": "fork.knife"
+        }
+      ],
       "bookingURL": "https://stoneandwood.com.au/pages/brisbane?utm_source=google&utm_medium=organic&utm_campaign=gbp",
       "phoneNumber": "0476 446 336",
       "images": [],
@@ -6932,7 +8427,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.breakfastcreekhotel.com/",
       "phoneNumber": "(07) 3262 5988",
       "images": [],
@@ -6992,7 +8500,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.storybridgehotel.com.au/",
       "phoneNumber": "(07) 3391 2266",
       "images": [],
@@ -7052,7 +8573,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.ploughinn.com.au/",
       "phoneNumber": "(07) 3844 7777",
       "images": [],
@@ -7112,7 +8646,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://roseandcrownpub.com.au/?utm_source=google_business_profile&utm_medium=gbp_view_website&utm_campaign=gbp",
       "phoneNumber": "(07) 3518 3400",
       "images": [],
@@ -7172,7 +8719,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.transhotel.net.au/",
       "phoneNumber": "(07) 3236 1366",
       "images": [],
@@ -7232,7 +8792,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://thelordalfred.com.au/",
       "phoneNumber": "(07) 3924 8024",
       "images": [],
@@ -7292,7 +8865,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": null,
       "phoneNumber": "(07) 3221 0444",
       "images": [],
@@ -7352,7 +8938,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.treasurybrisbane.com.au/",
       "phoneNumber": "(07) 3306 8888",
       "images": [],
@@ -7412,7 +9011,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.aussienash.com.au/",
       "phoneNumber": "(07) 3391 3964",
       "images": [],
@@ -7472,7 +9084,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.thebrunswickhotel.com.au/",
       "phoneNumber": "(07) 3850 0000",
       "images": [],
@@ -7532,7 +9157,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.brookhotel.com.au/",
       "phoneNumber": "(07) 3355 5366",
       "images": [],
@@ -7592,7 +9230,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://koalatavern.com.au/",
       "phoneNumber": "(07) 3051 7634",
       "images": [],
@@ -7652,7 +9303,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.crownhotelbrisbane.com.au/?utm_source=google&utm_medium=organic&utm_campaign=gmb&utm_term=plcid_6553501846422152838",
       "phoneNumber": "(07) 3051 7604",
       "images": [],
@@ -7712,7 +9376,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.hopeandanchor.net.au/",
       "phoneNumber": "(07) 3367 8300",
       "images": [],
@@ -7772,7 +9449,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://mangohilltavern.com.au/?utm_source=google&utm_medium=organic&utm_campaign=gmb&utm_term=plcid_2893092447747331586",
       "phoneNumber": "(07) 3051 7612",
       "images": [],
@@ -7832,7 +9522,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://newnhamhotel.com.au/",
       "phoneNumber": "(07) 3051 7615",
       "images": [],
@@ -7892,7 +9595,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.evertonparkhotel.com.au/?utm_source=google&utm_medium=organic&utm_campaign=gmb&utm_term=plcid_17209236002679202574",
       "phoneNumber": "(07) 3051 7606",
       "images": [],
@@ -7952,7 +9668,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.dugandanhotel.com.au/",
       "phoneNumber": "(07) 5463 1048",
       "images": [],
@@ -8012,7 +9741,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.hotelcommonwealth.com.au/",
       "phoneNumber": "(07) 3543 2143",
       "images": [],
@@ -8072,7 +9814,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://brightonhotelmotel.com.au/",
       "phoneNumber": "(07) 3051 7646",
       "images": [],
@@ -8132,7 +9887,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.glenhotel.com.au/",
       "phoneNumber": "(07) 3270 6666",
       "images": [],
@@ -8192,7 +9960,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "https://www.kallangurtavern.com.au/",
       "phoneNumber": "(07) 3204 4333",
       "images": [],
@@ -8252,7 +10033,20 @@
         "saturday": "12pm-3am",
         "sunday": "12pm-12am"
       },
-      "features": [],
+      "features": [
+        {
+          "name": "Beer Garden",
+          "icon": "cup.and.saucer"
+        },
+        {
+          "name": "Pub Food",
+          "icon": "fork.knife"
+        },
+        {
+          "name": "Sports TV",
+          "icon": "tv"
+        }
+      ],
       "bookingURL": "http://www.stockexchangehotel.com.au/",
       "phoneNumber": "(07) 3229 3522",
       "images": [],
