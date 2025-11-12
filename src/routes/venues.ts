@@ -261,7 +261,7 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
   res.json({ venue: venueWithIcon });
 }));
 
-// GET /venues/:id/busy - Get venue busy data
+// GET /venues/:id/busy - Get venue busy data with live-adjusted predictions
 router.get('/:id/busy', asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { hours = 24 } = req.query;
@@ -290,11 +290,75 @@ router.get('/:id/busy', asyncHandler(async (req, res) => {
     ? snapshots[snapshots.length - 1].timestamp
     : null;
 
+  // Calculate live-adjusted predictions based on recent trends
+  let adjustedPopularTimes = null;
+  let adjustmentFactor = 1.0;
+
+  if (venue.popularTimes && snapshots.length > 0) {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentDay = now.getDay();
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const currentDayName = dayNames[currentDay];
+
+    // Get recent snapshots (last 2 hours) to calculate adjustment
+    const recentSnapshots = snapshots.filter(s => {
+      const snapshotAge = Date.now() - s.timestamp.getTime();
+      return snapshotAge <= 2 * 60 * 60 * 1000; // Last 2 hours
+    });
+
+    if (recentSnapshots.length > 0) {
+      const popularTimes = venue.popularTimes as any;
+
+      // Calculate how current busyness compares to prediction
+      const recentActualAvg = recentSnapshots.reduce((sum, s) => sum + s.occupancyPercentage, 0) / recentSnapshots.length;
+
+      // Get predicted value for current hour
+      let predictedCurrent = null;
+      if (popularTimes[currentDayName] && popularTimes[currentDayName][currentHour]) {
+        predictedCurrent = popularTimes[currentDayName][currentHour].percentage;
+      }
+
+      // If we have a prediction for current hour, calculate adjustment factor
+      if (predictedCurrent !== null && predictedCurrent > 0) {
+        // Adjustment factor: how much busier or quieter than predicted
+        adjustmentFactor = recentActualAvg / predictedCurrent;
+
+        // Cap adjustment factor to reasonable bounds (0.5x to 2.0x)
+        adjustmentFactor = Math.max(0.5, Math.min(2.0, adjustmentFactor));
+      }
+
+      // Create adjusted predictions for future hours
+      adjustedPopularTimes = JSON.parse(JSON.stringify(popularTimes)); // Deep copy
+
+      // Apply adjustment factor to future hours of today
+      if (adjustedPopularTimes[currentDayName]) {
+        for (let hour = currentHour; hour < 24; hour++) {
+          if (adjustedPopularTimes[currentDayName][hour]) {
+            const originalPercentage = adjustedPopularTimes[currentDayName][hour].percentage;
+            const adjustedPercentage = Math.min(100, Math.max(0, Math.round(originalPercentage * adjustmentFactor)));
+            adjustedPopularTimes[currentDayName][hour] = {
+              ...adjustedPopularTimes[currentDayName][hour],
+              percentage: adjustedPercentage,
+              originalPercentage: originalPercentage,
+              isAdjusted: true
+            };
+          }
+        }
+      }
+    } else {
+      // No recent data to adjust with, use original popular times
+      adjustedPopularTimes = venue.popularTimes;
+    }
+  }
+
   res.json({
     venueId: id,
     snapshots,
     lastUpdated: lastSnapshotTime || new Date(),
-    popularTimes: venue.popularTimes || null, // Include popular times as fallback
+    popularTimes: venue.popularTimes || null, // Original popular times
+    adjustedPopularTimes: adjustedPopularTimes, // Live-adjusted predictions
+    adjustmentFactor: adjustmentFactor, // How much we adjusted (for debugging)
     hasLiveData: snapshots.length > 0
   });
 }));
