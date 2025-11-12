@@ -128,14 +128,14 @@ app.post('/admin/seed-database', async (req, res) => {
 
     console.log(`Seeding ${venuesData.venues.length} venues...`);
 
-    // Clear existing data
+    // Clear existing venue-related data (preserve user posts)
     await prisma.busySnapshot.deleteMany();
     await prisma.deal.deleteMany();
     await prisma.event.deleteMany();
-    await prisma.post.deleteMany();
+    // Note: We do NOT delete posts - these are user-generated content
     await prisma.story.deleteMany();
     await prisma.venue.deleteMany();
-    console.log('Cleared existing venue data');
+    console.log('Cleared existing venue data (preserved user posts)');
 
     // Process each venue
     let successCount = 0;
