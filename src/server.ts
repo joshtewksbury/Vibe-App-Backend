@@ -220,6 +220,97 @@ app.post('/admin/restore-venue-icons', async (req, res) => {
   }
 });
 
+// Restore venue banner images from backup (admin use only)
+app.post('/admin/restore-venue-images', async (req, res) => {
+  try {
+    // Security: Only allow with correct admin key
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== process.env.ADMIN_SEED_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    console.log('🔄 Starting venue image restoration from backup...');
+
+    const fs = require('fs');
+    const path = require('path');
+
+    // Read backup file with images
+    const backupPath = path.join(process.cwd(), 'venues.json.backup_20251112_101202');
+
+    if (!fs.existsSync(backupPath)) {
+      return res.status(404).json({
+        error: 'Backup file not found',
+        message: 'venues.json.backup_20251112_101202 does not exist'
+      });
+    }
+
+    const backupData = JSON.parse(fs.readFileSync(backupPath, 'utf-8'));
+    const backupVenues = backupData.venues;
+
+    // Filter venues that have images
+    const venuesWithImages = backupVenues.filter((v: any) => v.images && v.images.length > 0);
+
+    console.log(`Found ${venuesWithImages.length} venues with images in backup`);
+
+    // Normalize name for matching
+    const normalizeName = (name: string) => name.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+
+    // Get all venues from database
+    const dbVenues = await prisma.venue.findMany({
+      select: { id: true, name: true, images: true }
+    });
+
+    let updatedCount = 0;
+    const results: any[] = [];
+
+    for (const backupVenue of venuesWithImages) {
+      const normalizedBackupName = normalizeName(backupVenue.name);
+
+      // Find matching venue
+      const matchingVenue = dbVenues.find((v: any) => {
+        const normalizedVenueName = normalizeName(v.name);
+        return normalizedVenueName === normalizedBackupName ||
+               normalizedVenueName.includes(normalizedBackupName) ||
+               normalizedBackupName.includes(normalizedVenueName);
+      });
+
+      if (matchingVenue && (!matchingVenue.images || matchingVenue.images.length === 0)) {
+        // Update venue with images from backup
+        await prisma.venue.update({
+          where: { id: matchingVenue.id },
+          data: { images: backupVenue.images }
+        });
+
+        updatedCount++;
+        results.push({
+          venue: matchingVenue.name,
+          imageCount: backupVenue.images.length,
+          firstImage: backupVenue.images[0].substring(0, 50) + '...'
+        });
+      }
+    }
+
+    console.log(`✅ Successfully restored images for ${updatedCount} venues!`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Venue images restored successfully',
+      statistics: {
+        venuesWithImagesInBackup: venuesWithImages.length,
+        updated: updatedCount
+      },
+      results: results.slice(0, 10) // Return first 10 as sample
+    });
+
+  } catch (error) {
+    console.error('❌ Error restoring venue images:', error);
+    res.status(500).json({
+      error: 'Image restoration failed',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Database seed endpoint (admin use only - secured with environment variable)
 app.post('/admin/seed-database', async (req, res) => {
   try {

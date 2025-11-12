@@ -11,13 +11,14 @@ const serpApi_1 = require("../services/serpApi");
 const googlePlaces_1 = require("../services/googlePlaces");
 const busynessScheduler_1 = require("../services/busynessScheduler");
 const venueStatusColors_1 = require("../shared/utils/venueStatusColors");
+const busynessHistoryService_1 = require("../services/busynessHistoryService");
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const router = express_1.default.Router();
 const serpApiService = new serpApi_1.SerpAPIService();
 const googlePlacesService = new googlePlaces_1.GooglePlacesService();
 // GET /venues - Get all venues with optional filtering
 router.get('/', (0, errorHandler_1.asyncHandler)(async (req, res) => {
-    const { lat, lng, radius = 10000, category, limit = 50, offset = 0 } = req.query;
+    const { lat, lng, radius = 10000, category, limit = 500, offset = 0 } = req.query;
     let whereClause = {};
     let orderBy = { name: 'asc' };
     // Filter by category if provided
@@ -638,6 +639,110 @@ router.get('/scheduler/status', (0, auth_1.requireRole)(['ADMIN']), (0, errorHan
             occupancyPercentage: latestSnapshot.occupancyPercentage,
             source: latestSnapshot.source
         } : null
+    });
+}));
+// GET /venues/:id/busyness-history - Get historical busyness data for a venue
+router.get('/:id/busyness-history', (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const { id } = req.params;
+    const { days = 7, dayOfWeek, hour } = req.query;
+    let whereClause = {
+        venueId: id
+    };
+    // Filter by specific day of week and hour if provided
+    if (dayOfWeek) {
+        whereClause.dayOfWeek = parseInt(dayOfWeek);
+    }
+    if (hour !== undefined) {
+        whereClause.hour = parseInt(hour);
+    }
+    // Filter by date range
+    if (!dayOfWeek) {
+        const daysBack = parseInt(days);
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - daysBack);
+        whereClause.date = {
+            gte: startDate
+        };
+    }
+    const history = await prisma_1.default.busynessHistory.findMany({
+        where: whereClause,
+        orderBy: [
+            { date: 'desc' },
+            { hour: 'asc' }
+        ],
+        take: 500 // Limit results
+    });
+    res.json({
+        venueId: id,
+        totalRecords: history.length,
+        history: history.map(h => ({
+            date: h.date,
+            hour: h.hour,
+            dayOfWeek: h.dayOfWeek,
+            avgOccupancyPercentage: h.avgOccupancyPercentage,
+            avgOccupancyCount: h.avgOccupancyCount,
+            status: h.avgStatus,
+            dataPointCount: h.dataPointCount,
+            predictedOccupancyPercentage: h.predictedOccupancyPercentage,
+            predictionAccuracy: h.predictionAccuracy,
+            source: h.source,
+            createdAt: h.createdAt
+        }))
+    });
+}));
+// GET /venues/:id/prediction-accuracy - Get prediction accuracy metrics for a venue
+router.get('/:id/prediction-accuracy', (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const { id } = req.params;
+    // Get overall prediction accuracy
+    const accuracy = await (0, busynessHistoryService_1.getVenuePredictionAccuracy)(id);
+    // Get detailed metrics by day/hour
+    const metrics = await prisma_1.default.predictionMetrics.findMany({
+        where: { venueId: id },
+        orderBy: [
+            { year: 'desc' },
+            { weekOfYear: 'desc' },
+            { dayOfWeek: 'asc' },
+            { hour: 'asc' }
+        ],
+        take: 100
+    });
+    res.json({
+        venueId: id,
+        overall: accuracy,
+        metrics: metrics.map(m => ({
+            year: m.year,
+            weekOfYear: m.weekOfYear,
+            dayOfWeek: m.dayOfWeek,
+            hour: m.hour,
+            avgPredictionError: m.avgPredictionError,
+            totalPredictions: m.totalPredictions,
+            accuratePredictions: m.accuratePredictions,
+            accuracyPercentage: (m.accuratePredictions / m.totalPredictions) * 100,
+            lastUpdated: m.lastUpdated
+        }))
+    });
+}));
+// GET /venues/:id/historical-pattern - Get historical busyness patterns for prediction
+router.get('/:id/historical-pattern', (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const { id } = req.params;
+    const { dayOfWeek, hour, weeksBack = 4 } = req.query;
+    if (!dayOfWeek || hour === undefined) {
+        return res.status(400).json({ error: 'dayOfWeek and hour are required' });
+    }
+    const dow = parseInt(dayOfWeek);
+    const h = parseInt(hour);
+    const weeks = parseInt(weeksBack);
+    const pattern = await (0, busynessHistoryService_1.getHistoricalPattern)(id, dow, h, weeks);
+    res.json({
+        venueId: id,
+        dayOfWeek: dow,
+        hour: h,
+        weeksAnalyzed: weeks,
+        dataPoints: pattern.length,
+        pattern: pattern,
+        average: pattern.length > 0 ? Math.round(pattern.reduce((a, b) => a + b, 0) / pattern.length) : 0,
+        min: pattern.length > 0 ? Math.min(...pattern) : 0,
+        max: pattern.length > 0 ? Math.max(...pattern) : 0
     });
 }));
 exports.default = router;

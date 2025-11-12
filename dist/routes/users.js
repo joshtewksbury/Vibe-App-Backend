@@ -179,5 +179,70 @@ router.delete('/me', auth_1.authMiddleware, (0, errorHandler_1.asyncHandler)(asy
         message: 'Account deleted successfully'
     });
 }));
+// POST /users/device-token - Register device token for push notifications
+router.post('/device-token', auth_1.authMiddleware, (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const userId = req.user.id;
+    const { deviceToken, platform = 'ios' } = req.body;
+    if (!deviceToken) {
+        return res.status(400).json({ error: 'Device token is required' });
+    }
+    console.log(`📲 Registering device token for user ${userId}: ${deviceToken.substring(0, 10)}...`);
+    // Check if token already exists
+    const existing = await prisma_1.default.deviceToken.findUnique({
+        where: {
+            userId_token: {
+                userId,
+                token: deviceToken
+            }
+        }
+    });
+    if (existing) {
+        // Reactivate if it was deactivated
+        await prisma_1.default.deviceToken.update({
+            where: { id: existing.id },
+            data: { isActive: true, updatedAt: new Date() }
+        });
+        console.log(`✅ Device token reactivated for user ${userId}`);
+    }
+    else {
+        // Create new device token
+        await prisma_1.default.deviceToken.create({
+            data: {
+                userId,
+                token: deviceToken,
+                platform
+            }
+        });
+        console.log(`✅ New device token registered for user ${userId}`);
+    }
+    res.json({
+        success: true,
+        message: 'Device token registered successfully'
+    });
+}));
+// DELETE /users/device-token - Unregister device token
+router.delete('/device-token', auth_1.authMiddleware, (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const userId = req.user.id;
+    const { deviceToken } = req.body;
+    if (!deviceToken) {
+        return res.status(400).json({ error: 'Device token is required' });
+    }
+    console.log(`📲 Unregistering device token for user ${userId}`);
+    // Deactivate the token instead of deleting
+    await prisma_1.default.deviceToken.updateMany({
+        where: {
+            userId,
+            token: deviceToken
+        },
+        data: {
+            isActive: false
+        }
+    });
+    console.log(`✅ Device token deactivated for user ${userId}`);
+    res.json({
+        success: true,
+        message: 'Device token unregistered successfully'
+    });
+}));
 exports.default = router;
 //# sourceMappingURL=users.js.map
