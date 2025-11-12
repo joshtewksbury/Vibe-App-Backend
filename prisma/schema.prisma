@@ -117,6 +117,8 @@ model Venue {
 
   // Relations
   busySnapshots    BusySnapshot[]
+  busynessHistory  BusynessHistory[]
+  predictionMetrics PredictionMetrics[]
   posts            Post[]
   deals            Deal[]
   events           Event[]
@@ -407,6 +409,62 @@ model VenueImage {
   @@index([imageType])
   @@index([isActive])
   @@index([venueId, imageType, isActive])
+}
+
+// MARK: - Historical Busyness & Prediction Models
+
+model BusynessHistory {
+  id                  String     @id @default(cuid())
+  venueId             String
+  date                DateTime   // Date of the data point
+  hour                Int        // Hour of day (0-23)
+  dayOfWeek           Int        // Day of week (1-7, 1=Monday)
+
+  // Actual observed data
+  avgOccupancyCount      Int
+  avgOccupancyPercentage Int
+  avgStatus              BusyStatus
+  dataPointCount         Int      // Number of snapshots averaged
+
+  // Prediction tracking
+  predictedOccupancyPercentage Int?   // What was predicted for this hour
+  predictionAccuracy           Float? // Percentage difference between predicted and actual
+
+  // Metadata
+  source              String     @default("aggregated") // "aggregated", "historical"
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  @@unique([venueId, date, hour])
+  @@map("busyness_history")
+  @@index([venueId, date])
+  @@index([venueId, dayOfWeek, hour])
+}
+
+model PredictionMetrics {
+  id                  String   @id @default(cuid())
+  venueId             String
+  weekOfYear          Int      // Week number (1-52)
+  year                Int      // Year
+  dayOfWeek           Int      // Day of week (1-7)
+  hour                Int      // Hour (0-23)
+
+  // Aggregated prediction metrics
+  avgPredictionError     Float  // Average error percentage
+  totalPredictions       Int    // Total predictions made
+  accuratePredictions    Int    // Predictions within 10% margin
+
+  lastUpdated         DateTime @updatedAt
+  createdAt           DateTime @default(now())
+
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  @@unique([venueId, year, weekOfYear, dayOfWeek, hour])
+  @@map("prediction_metrics")
+  @@index([venueId])
+  @@index([venueId, year, weekOfYear])
 }
 
 // Enums

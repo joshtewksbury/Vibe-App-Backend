@@ -1,18 +1,24 @@
 import { SerpAPIService, SerpLiveBusynessData } from './serpApi';
 import prisma from '../lib/prisma';
 import { BusyStatus } from '@prisma/client';
+import { aggregatePreviousHourForAllVenues } from './busynessHistoryService';
 
 /**
  * Service to periodically fetch live busyness data and create snapshots
  * Runs every 15 minutes to keep data fresh
+ * Also runs hourly aggregation to build historical data for predictions
  */
 export class BusynessSchedulerService {
   private serpApiService: SerpAPIService;
   private intervalId: NodeJS.Timeout | null = null;
+  private hourlyIntervalId: NodeJS.Timeout | null = null;
   private isRunning = false;
 
   // Refresh interval: 15 minutes (900,000 ms)
   private readonly REFRESH_INTERVAL = 15 * 60 * 1000;
+
+  // Hourly aggregation interval: 60 minutes (3,600,000 ms)
+  private readonly HOURLY_AGGREGATION_INTERVAL = 60 * 60 * 1000;
 
   // Place ID mapping from iOS app (RealTimeBusynessService.swift)
   private readonly placeIdMapping: Record<string, string> = {
@@ -64,7 +70,7 @@ export class BusynessSchedulerService {
   }
 
   /**
-   * Start the periodic busyness data refresh
+   * Start the periodic busyness data refresh and hourly aggregation
    */
   start(): void {
     if (this.isRunning) {
@@ -72,20 +78,41 @@ export class BusynessSchedulerService {
       return;
     }
 
-    console.log('🚀 Starting busyness scheduler (15-minute intervals)...');
+    console.log('🚀 Starting busyness scheduler...');
+    console.log('   📊 Live data: Every 15 minutes');
+    console.log('   🕐 Historical aggregation: Every hour');
     this.isRunning = true;
 
-    // Run immediately on start
+    // Run live data fetch immediately on start
     this.fetchAndUpdateAllVenues().catch(err => {
       console.error('❌ Error in initial busyness fetch:', err);
     });
 
-    // Then run every 15 minutes
+    // Run live data fetch every 15 minutes
     this.intervalId = setInterval(() => {
       this.fetchAndUpdateAllVenues().catch(err => {
         console.error('❌ Error in scheduled busyness fetch:', err);
       });
     }, this.REFRESH_INTERVAL);
+
+    // Calculate time until next hour for initial aggregation
+    const now = new Date();
+    const msUntilNextHour = (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000;
+
+    // Run initial aggregation after reaching the next hour
+    setTimeout(() => {
+      // Run aggregation for the previous hour
+      aggregatePreviousHourForAllVenues().catch(err => {
+        console.error('❌ Error in initial hourly aggregation:', err);
+      });
+
+      // Then run aggregation every hour
+      this.hourlyIntervalId = setInterval(() => {
+        aggregatePreviousHourForAllVenues().catch(err => {
+          console.error('❌ Error in scheduled hourly aggregation:', err);
+        });
+      }, this.HOURLY_AGGREGATION_INTERVAL);
+    }, msUntilNextHour);
 
     console.log('✅ Busyness scheduler started successfully');
   }
@@ -97,9 +124,15 @@ export class BusynessSchedulerService {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
-      this.isRunning = false;
-      console.log('⏹️  Busyness scheduler stopped');
     }
+
+    if (this.hourlyIntervalId) {
+      clearInterval(this.hourlyIntervalId);
+      this.hourlyIntervalId = null;
+    }
+
+    this.isRunning = false;
+    console.log('⏹️  Busyness scheduler stopped');
   }
 
   /**

@@ -12,6 +12,7 @@ import { SerpAPIService } from '../services/serpApi';
 import { GooglePlacesService } from '../services/googlePlaces';
 import { busynessScheduler } from '../services/busynessScheduler';
 import { calculateVenueStatus, getStatusColor } from '../shared/utils/venueStatusColors';
+import { getVenuePredictionAccuracy, getHistoricalPattern } from '../services/busynessHistoryService';
 import prisma from '../lib/prisma';
 
 const router = express.Router();
@@ -747,6 +748,127 @@ router.get('/scheduler/status', requireRole(['ADMIN']), asyncHandler(async (req:
       occupancyPercentage: latestSnapshot.occupancyPercentage,
       source: latestSnapshot.source
     } : null
+  });
+}));
+
+// GET /venues/:id/busyness-history - Get historical busyness data for a venue
+router.get('/:id/busyness-history', asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { days = 7, dayOfWeek, hour } = req.query;
+
+  let whereClause: any = {
+    venueId: id
+  };
+
+  // Filter by specific day of week and hour if provided
+  if (dayOfWeek) {
+    whereClause.dayOfWeek = parseInt(dayOfWeek as string);
+  }
+
+  if (hour !== undefined) {
+    whereClause.hour = parseInt(hour as string);
+  }
+
+  // Filter by date range
+  if (!dayOfWeek) {
+    const daysBack = parseInt(days as string);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysBack);
+
+    whereClause.date = {
+      gte: startDate
+    };
+  }
+
+  const history = await prisma.busynessHistory.findMany({
+    where: whereClause,
+    orderBy: [
+      { date: 'desc' },
+      { hour: 'asc' }
+    ],
+    take: 500 // Limit results
+  });
+
+  res.json({
+    venueId: id,
+    totalRecords: history.length,
+    history: history.map(h => ({
+      date: h.date,
+      hour: h.hour,
+      dayOfWeek: h.dayOfWeek,
+      avgOccupancyPercentage: h.avgOccupancyPercentage,
+      avgOccupancyCount: h.avgOccupancyCount,
+      status: h.avgStatus,
+      dataPointCount: h.dataPointCount,
+      predictedOccupancyPercentage: h.predictedOccupancyPercentage,
+      predictionAccuracy: h.predictionAccuracy,
+      source: h.source,
+      createdAt: h.createdAt
+    }))
+  });
+}));
+
+// GET /venues/:id/prediction-accuracy - Get prediction accuracy metrics for a venue
+router.get('/:id/prediction-accuracy', asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  // Get overall prediction accuracy
+  const accuracy = await getVenuePredictionAccuracy(id);
+
+  // Get detailed metrics by day/hour
+  const metrics = await prisma.predictionMetrics.findMany({
+    where: { venueId: id },
+    orderBy: [
+      { year: 'desc' },
+      { weekOfYear: 'desc' },
+      { dayOfWeek: 'asc' },
+      { hour: 'asc' }
+    ],
+    take: 100
+  });
+
+  res.json({
+    venueId: id,
+    overall: accuracy,
+    metrics: metrics.map(m => ({
+      year: m.year,
+      weekOfYear: m.weekOfYear,
+      dayOfWeek: m.dayOfWeek,
+      hour: m.hour,
+      avgPredictionError: m.avgPredictionError,
+      totalPredictions: m.totalPredictions,
+      accuratePredictions: m.accuratePredictions,
+      accuracyPercentage: (m.accuratePredictions / m.totalPredictions) * 100,
+      lastUpdated: m.lastUpdated
+    }))
+  });
+}));
+
+// GET /venues/:id/historical-pattern - Get historical busyness patterns for prediction
+router.get('/:id/historical-pattern', asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { dayOfWeek, hour, weeksBack = 4 } = req.query;
+
+  if (!dayOfWeek || hour === undefined) {
+    return res.status(400).json({ error: 'dayOfWeek and hour are required' });
+  }
+
+  const dow = parseInt(dayOfWeek as string);
+  const h = parseInt(hour as string);
+  const weeks = parseInt(weeksBack as string);
+
+  const pattern = await getHistoricalPattern(id, dow, h, weeks);
+
+  res.json({
+    venueId: id,
+    dayOfWeek: dow,
+    hour: h,
+    weeksAnalyzed: weeks,
+    dataPoints: pattern.length,
+    pattern: pattern,
+    average: pattern.length > 0 ? Math.round(pattern.reduce((a, b) => a + b, 0) / pattern.length) : 0,
+    min: pattern.length > 0 ? Math.min(...pattern) : 0,
+    max: pattern.length > 0 ? Math.max(...pattern) : 0
   });
 }));
 
