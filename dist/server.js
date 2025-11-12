@@ -307,6 +307,46 @@ app.post('/admin/restore-venue-images', async (req, res) => {
         });
     }
 });
+// Update venue opening hours (admin use only)
+app.post('/admin/update-venue-hours', async (req, res) => {
+    try {
+        // Security: Only allow with correct admin key
+        const adminKey = req.headers['x-admin-key'];
+        if (adminKey !== process.env.ADMIN_SEED_KEY) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+        const { venueId, openingHours } = req.body;
+        if (!venueId || !openingHours) {
+            return res.status(400).json({
+                error: 'Missing required fields',
+                message: 'venueId and openingHours are required'
+            });
+        }
+        console.log(`🔄 Updating opening hours for venue ${venueId}...`);
+        const venue = await prisma_1.default.venue.update({
+            where: { id: venueId },
+            data: { openingHours },
+            select: {
+                id: true,
+                name: true,
+                openingHours: true
+            }
+        });
+        console.log(`✅ Successfully updated opening hours for ${venue.name}`);
+        res.status(200).json({
+            success: true,
+            message: 'Opening hours updated successfully',
+            venue
+        });
+    }
+    catch (error) {
+        console.error('❌ Error updating opening hours:', error);
+        res.status(500).json({
+            error: 'Failed to update opening hours',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
 // Database seed endpoint (admin use only - secured with environment variable)
 app.post('/admin/seed-database', async (req, res) => {
     try {
