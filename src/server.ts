@@ -408,6 +408,128 @@ app.post('/admin/trigger-busyness-refresh', async (req, res) => {
   }
 });
 
+// Update opening hours for all venues from Google Maps data (admin use only)
+app.post('/admin/update-opening-hours', async (req, res) => {
+  try {
+    // Security: Only allow with correct admin key
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== process.env.ADMIN_SEED_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    console.log('🕐 Fetching opening hours for all venues from Google Maps...');
+
+    // Get all venues
+    const venues = await prisma.venue.findMany({
+      select: { id: true, name: true, location: true, placeId: true }
+    });
+
+    let successCount = 0;
+    let failCount = 0;
+    const results: any[] = [];
+
+    // Process in batches to avoid rate limiting
+    const batchSize = 5;
+    for (let i = 0; i < venues.length; i += batchSize) {
+      const batch = venues.slice(i, i + batchSize);
+
+      await Promise.all(batch.map(async (venue) => {
+        try {
+          if (!venue.placeId) {
+            console.log(`⚠️  No Place ID for ${venue.name}, skipping`);
+            failCount++;
+            return;
+          }
+
+          // Fetch place details from SerpAPI
+          const { SerpAPIService } = require('./services/serpApi');
+          const serpApi = new SerpAPIService();
+
+          const params = {
+            engine: 'google_maps',
+            type: 'place',
+            place_id: venue.placeId,
+            api_key: process.env.SERP_API_KEY
+          };
+
+          const axios = require('axios');
+          const response = await axios.get('https://serpapi.com/search', { params });
+
+          if (response.data?.place_results?.hours) {
+            const hours = response.data.place_results.hours;
+
+            // Parse hours into our format
+            const openingHours: any = {};
+            const dayMap: Record<string, string> = {
+              'Monday': 'monday',
+              'Tuesday': 'tuesday',
+              'Wednesday': 'wednesday',
+              'Thursday': 'thursday',
+              'Friday': 'friday',
+              'Saturday': 'saturday',
+              'Sunday': 'sunday'
+            };
+
+            for (const day in dayMap) {
+              const hoursStr = hours[day] || hours[day.toLowerCase()];
+              if (hoursStr) {
+                openingHours[dayMap[day]] = hoursStr;
+              }
+            }
+
+            // Update venue if we got hours
+            if (Object.keys(openingHours).length > 0) {
+              await prisma.venue.update({
+                where: { id: venue.id },
+                data: { openingHours }
+              });
+
+              console.log(`✅ Updated hours for ${venue.name}`);
+              results.push({ venue: venue.name, status: 'success', hours: openingHours });
+              successCount++;
+            } else {
+              console.log(`⚠️  No hours found for ${venue.name}`);
+              failCount++;
+            }
+          } else {
+            console.log(`⚠️  No hours data for ${venue.name}`);
+            failCount++;
+          }
+
+          // Rate limiting delay
+          await new Promise(resolve => setTimeout(resolve, 200));
+
+        } catch (error) {
+          console.error(`❌ Error updating ${venue.name}:`, error);
+          results.push({ venue: venue.name, status: 'error', message: error instanceof Error ? error.message : 'Unknown error' });
+          failCount++;
+        }
+      }));
+
+      // Delay between batches
+      if (i + batchSize < venues.length) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Opening hours update completed',
+      totalVenues: venues.length,
+      successCount,
+      failCount,
+      sampleResults: results.slice(0, 10)
+    });
+
+  } catch (error) {
+    console.error('❌ Error updating opening hours:', error);
+    res.status(500).json({
+      error: 'Failed to update opening hours',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Database seed endpoint (admin use only - secured with environment variable)
 app.post('/admin/seed-database', async (req, res) => {
   try {
