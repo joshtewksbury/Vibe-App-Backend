@@ -376,28 +376,26 @@ app.post('/admin/trigger-busyness-refresh', async (req, res) => {
     const isRunning = (busynessScheduler as any).isRunning;
     console.log(`Scheduler running status: ${isRunning}`);
 
-    // Trigger manual refresh
-    await (busynessScheduler as any).fetchAndUpdateAllVenues();
+    // Get current snapshot count before refresh
+    const snapshotCountBefore = await prisma.busySnapshot.count();
 
-    // Get updated snapshot count
-    const snapshotCount = await prisma.busySnapshot.count();
-    const recentSnapshots = await prisma.busySnapshot.findMany({
-      orderBy: { timestamp: 'desc' },
-      take: 5,
-      select: {
-        timestamp: true,
-        venueId: true,
-        occupancyPercentage: true,
-        venue: { select: { name: true } }
-      }
-    });
+    // Trigger manual refresh asynchronously (don't wait for it to complete)
+    (busynessScheduler as any).fetchAndUpdateAllVenues()
+      .then(async () => {
+        const snapshotCountAfter = await prisma.busySnapshot.count();
+        console.log(`✅ Busyness refresh completed. Snapshots: ${snapshotCountBefore} → ${snapshotCountAfter}`);
+      })
+      .catch((error: Error) => {
+        console.error('❌ Error during background busyness refresh:', error);
+      });
 
+    // Return immediately
     res.status(200).json({
       success: true,
-      message: 'Busyness refresh triggered successfully',
+      message: 'Busyness refresh started in background',
       schedulerRunning: isRunning,
-      totalSnapshots: snapshotCount,
-      recentSnapshots
+      currentSnapshots: snapshotCountBefore,
+      note: 'Refresh is running in the background. Check logs for completion status.'
     });
 
   } catch (error) {
