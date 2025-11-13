@@ -29,6 +29,7 @@ import postsRoutes from './routes/posts';
 import storiesRoutes from './routes/stories';
 import accountSettingsRoutes from './routes/accountSettings';
 import eventsRoutes from './routes/events';
+import pushNotificationsRoutes from './routes/pushNotifications';
 
 // Load environment variables
 config();
@@ -713,6 +714,7 @@ app.use('/posts', postsRoutes); // Posts routes include their own auth middlewar
 app.use('/stories', storiesRoutes); // Stories routes include their own auth middleware
 app.use('/account', accountSettingsRoutes); // Account settings routes with auth
 app.use('/events', eventsRoutes); // Events routes with auth
+app.use('/notifications', pushNotificationsRoutes); // Push notification routes with auth
 
 // Sentry error handler must be registered before other error handlers
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {

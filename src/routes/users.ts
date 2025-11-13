@@ -217,10 +217,7 @@ router.post('/device-token', authMiddleware, asyncHandler(async (req: Authentica
   // Check if token already exists
   const existing = await prisma.deviceToken.findUnique({
     where: {
-      userId_token: {
-        userId,
-        token: deviceToken
-      }
+      token: deviceToken
     }
   });
 
@@ -228,7 +225,7 @@ router.post('/device-token', authMiddleware, asyncHandler(async (req: Authentica
     // Reactivate if it was deactivated
     await prisma.deviceToken.update({
       where: { id: existing.id },
-      data: { isActive: true, updatedAt: new Date() }
+      data: { active: true, lastUsed: new Date() }
     });
     console.log(`✅ Device token reactivated for user ${userId}`);
   } else {
@@ -267,7 +264,7 @@ router.delete('/device-token', authMiddleware, asyncHandler(async (req: Authenti
       token: deviceToken
     },
     data: {
-      isActive: false
+      active: false
     }
   });
 

@@ -37,6 +37,7 @@ model User {
   events           Event[]
   refreshTokens    RefreshToken[]
   deviceTokens     DeviceToken[]
+  notificationPreferences NotificationPreferences?
 
   // Friendship relations
   friendshipsInitiated Friendship[] @relation("FriendshipInitiator")
@@ -72,18 +73,57 @@ model RefreshToken {
 }
 
 model DeviceToken {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   // APNs device token
-  platform  String   @default("ios") // "ios" or "android"
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  platform    String   @default("ios")
+  active      Boolean  @default(true)
+  deviceName  String?
+  deviceModel String?
+  osVersion   String?
+  lastUsed    DateTime @default(now())
+  createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, token])
+  @@index([userId, active])
+  @@index([userId])
   @@map("device_tokens")
+}
+
+model NotificationPreferences {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  eventReminders Boolean @default(true)
+  venueArrivals Boolean @default(true)
+  friendActivity Boolean @default(true)
+  promotions    Boolean @default(true)
+  messages      Boolean @default(true)
+  venueUpdates  Boolean @default(true)
+  newFollowers  Boolean @default(true)
+  likes         Boolean @default(true)
+  comments      Boolean @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model NotificationLog {
+  id         String   @id @default(cuid())
+  title      String
+  body       String
+  type       String   @default("general")
+  recipients Int      @default(0)
+  success    Boolean  @default(false)
+  data       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([type])
+  @@map("notification_logs")
 }
 
 model Venue {

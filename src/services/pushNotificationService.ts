@@ -62,7 +62,7 @@ export async function sendPushNotification(
     const deviceTokens = await prisma.deviceToken.findMany({
       where: {
         userId,
-        isActive: true,
+        active: true,
         platform: 'ios',
       },
     });
@@ -101,7 +101,7 @@ export async function sendPushNotification(
             if (failure.response && (failure.response.reason === 'BadDeviceToken' || failure.response.reason === 'Unregistered')) {
               await prisma.deviceToken.update({
                 where: { id: deviceToken.id },
-                data: { isActive: false },
+                data: { active: false },
               });
               console.log(`🗑️ Deactivated invalid device token`);
             }

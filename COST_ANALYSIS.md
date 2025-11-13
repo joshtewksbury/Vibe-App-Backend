@@ -8,58 +8,68 @@
 ---
 
 ## Detailed Cost Breakdown
-
-| Service | Usage | Plan/Tier | Monthly Cost | Notes |
-|---------|-------|-----------|--------------|-------|
-| **SerpAPI** | 19,200 calls/day (576,000/month) | Enterprise | **$5,750** | Every 15 min for 200 venues = 4×24×200 |
-| **Google Places API** | 12,000-20,000 requests/month | Pay-as-you-go | **$204 - $340** | Place Details ($17/1k), minus $200 credit = $4-140 actual |
-| **N8N Workflows** | 576,000 executions/month | Enterprise | **$300 - $500** | Custom pricing for high volume |
-| **Cloudinary** | 150GB storage, 1TB bandwidth | Advanced Plan | **$249** | Images/videos for venues + user posts |
-| **Railway (Backend)** | 2 vCPU, 4GB RAM, PostgreSQL | Pro + Usage | **$150 - $250** | Node.js server + database for 10k users |
-| **Sports Data Feed** | Live sports data | Third-party | **$1,500** | As specified |
-| **Mixpanel Analytics** | 10,000 MAU, events tracking | Growth Plan | **$0 - $89** | Free up to 100M events, then $89/mo |
-| **SSL Certificate** | Domain security | Let's Encrypt | **$0** | Free via Railway |
-| **Domain Name** | vibeapp.com | Registrar | **$15** | Annual domain (~$180/year) |
-| **SMS/Auth (Optional)** | User verification | Twilio/Firebase | **$50 - $100** | If implementing phone auth |
-| **Backup Storage** | Database backups | S3/Cloud Storage | **$20 - $30** | 50GB backups |
-| **Monitoring** | Uptime/error tracking | Sentry/LogRocket | **$0 - $79** | Free tier or Growth plan |
-
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Service                 | Usage                            | Plan/Tier        | Monthly Cost    | Notes                                                     |
+|-------------------------|----------------------------------|------------------|-----------------|-----------------------------------------------------------|
+| **SerpAPI**             | 19,200 calls/day (576,000/month) | Enterprise       | **$5,750**      | Every 15 min for 200 venues = 4×24×200                    |
+| **Google Places API**   | 12,000-20,000 requests/month     | Pay-as-you-go    | **$204 - $340** | Place Details ($17/1k), minus $200 credit = $4-140 actual |
+| **N8N Workflows**       | 576,000 executions/month         | Enterprise       | **$300 - $500** | Custom pricing for high volume                            |
+| **Cloudinary**          | 150GB storage, 1TB bandwidth     | Advanced Plan    | **$249**        | Images/videos for venues + user posts                     |
+| **Railway (Backend)**   | 2 vCPU, 4GB RAM, PostgreSQL      | Pro + Usage      | **$150 - $250** | Node.js server + database for 10k users                   |
+| **Sports Data Feed**    | Live sports data                 | Third-party      | **$1,500**      | As specified                                              |
+| **Mixpanel Analytics**  | 10,000 MAU, events tracking      | Growth Plan      | **$0 - $89**    | Free up to 100M events, then $89/mo                       |
+| **SSL Certificate**     | Domain security                  | Let's Encrypt    | **$0**          | Free via Railway                                          |
+| **Domain Name**         | vibeapp.com                      | Registrar        | **$15**         | Annual domain (~$180/year)                                |
+| **SMS/Auth (Optional)** | User verification                | Twilio/Firebase  | **$50 - $100**  | If implementing phone auth                                |
+| **Backup Storage**      | Database backups                 | S3/Cloud Storage | **$20 - $30**   | 50GB backups                                              |
+| **Monitoring**          | Uptime/error tracking            | Sentry/LogRocket | **$0 - $79**    | Free tier or Growth plan                                  |
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
 ---
 
 ## Cost Analysis by Category
 
 ### 1. Data & API Costs (70% of total)
-| Item | Monthly Cost |
-|------|-------------|
-| SerpAPI (busyness data) | $5,750 |
-| Google Places API | $204 - $340 |
-| Sports Data Feed | $1,500 |
-| **Subtotal** | **$7,454 - $7,590** |
+-------------------------------------------------
+| Item                    | Monthly Cost        |
+|-------------------------|---------------------|
+| SerpAPI (busyness data) | $5,750              |
+| Google Places API       | $204 - $340         |
+| Sports Data Feed        | $1,500              |
+| **Subtotal**            | **$7,454 - $7,590** |
+-------------------------------------------------
+
 
 ### 2. Infrastructure (15% of total)
-| Item | Monthly Cost |
-|------|-------------|
-| Railway (Backend + DB) | $150 - $250 |
-| Cloudinary (Media CDN) | $249 |
-| Backup Storage | $20 - $30 |
-| **Subtotal** | **$419 - $529** |
+--------------------------------------------
+| Item                   | Monthly Cost    |
+|------------------------|-----------------|
+| Railway (Backend + DB) | $150 - $250     |
+| Cloudinary (Media CDN) | $249            |
+| Backup Storage         | $20 - $30       |
+| **Subtotal**           | **$419 - $529** |
+--------------------------------------------
 
 ### 3. Automation & Workflows (5% of total)
-| Item | Monthly Cost |
-|------|-------------|
-| N8N (Workflow automation) | $300 - $500 |
-| **Subtotal** | **$300 - $500** |
+
+-----------------------------------------------
+| Item                      | Monthly Cost    |
+|---------------------------|-----------------|
+| N8N (Workflow automation) | $300 - $500     |
+| **Subtotal**              | **$300 - $500** |
+-----------------------------------------------
 
 ### 4. Other Services (2% of total)
-| Item | Monthly Cost |
-|------|-------------|
-| Domain | $15 |
-| Analytics | $0 - $89 |
-| Monitoring | $0 - $79 |
-| SMS/Auth | $50 - $100 |
-| **Subtotal** | **$65 - $283** |
 
----
+---------------------------------
+| Item         | Monthly Cost   |
+|--------------|----------------|
+| Domain       | $15            |
+| Analytics    | $0 - $89       |
+| Monitoring   | $0 - $79       |
+| SMS/Auth     | $50 - $100     |
+| **Subtotal** | **$65 - $283** |
+---------------------------------
+
 
 ## Usage Assumptions
 
@@ -144,32 +154,36 @@
 ## Scaling Projections
 
 ### At 25,000 Users (2.5x growth)
-| Category | Current (10k) | At 25k | Increase |
-|----------|--------------|--------|----------|
-| SerpAPI | $5,750 | $5,750 | $0 (venue-based) |
-| Places API | $272 | $450 | $178 |
-| Railway | $200 | $400 | $200 |
-| Cloudinary | $249 | $549 | $300 |
-| N8N | $400 | $400 | $0 |
-| Sports Data | $1,500 | $1,500 | $0 |
-| Other | $147 | $250 | $103 |
-| **Total** | **$8,518** | **$9,299** | **$781** |
-| **Per User** | **$0.85** | **$0.37** | **-56%** |
+----------------------------------------------------------------
+| Category     | Current (10k) | At 25k     |     Increase     |
+|--------------|-------------- |------------|------------------|
+| SerpAPI      | $5,750        | $5,750     | $0 (venue-based) |
+| Places API   | $272          | $450       |       $178       |
+| Railway      | $200          | $400       |       $200       |
+| Cloudinary   | $249          | $549       |       $300       |
+| N8N          | $400          | $400       |        $0        |
+| Sports Data  | $1,500        | $1,500     |        $0        |
+| Other        | $147          | $250       |       $103       |
+| **Total**    | **$8,518**    | **$9,299** |     **$781**     |
+| **Per User** | **$0.85**     | **$0.37**  |     **-56%**     |
+----------------------------------------------------------------
+
 
 ### At 50,000 Users (5x growth)
-| Category | At 50k | Notes |
-|----------|--------|-------|
-| SerpAPI | $5,750 | No change (venue count same) |
-| Places API | $850 | More user searches |
-| Railway | $600-800 | Need more compute |
-| Cloudinary | $849 | Enterprise tier |
-| N8N | $400 | Same workflows |
-| Sports Data | $1,500 | No change |
-| Other | $400 | Monitoring, etc. |
-| **Total** | **$10,349-10,549** | |
-| **Per User** | **$0.21** | 75% lower than 10k |
+--------------------------------------------------------------------
+| Category     | At 50k             | Notes                        |
+|--------------|--------------------|------------------------------|
+| SerpAPI      | $5,750             | No change (venue count same) |
+| Places API   | $850               | More user searches           |
+| Railway      | $600-800           | Need more compute            |
+| Cloudinary   | $849               | Enterprise tier              |
+| N8N          | $400               | Same workflows               |
+| Sports Data  | $1,500             | No change                    |
+| Other        | $400               | Monitoring, etc.             |
+| **Total**    | **$10,349-10,549** |                              |
+| **Per User** | **$0.21**          | 75% lower than 10k           |
+--------------------------------------------------------------------
 
----
 
 ## Revenue Requirements
 
@@ -210,7 +224,7 @@
 - **Total monthly revenue**: $15,480
 - **Profit**: +$6,912 to +$7,162 ✅
 
----
+
 
 ## Recommendations
 
@@ -238,7 +252,7 @@
 3. Test promoted venue listings
 4. **Target**: $15,000/month revenue by Month 6
 
----
+
 
 ## Risk Analysis
 
@@ -254,35 +268,47 @@
 - **Infrastructure**: Railway auto-scales, predictable costs
 - **Mitigation**: Monitor usage, set billing alerts
 
----
 
 ## Appendix: Alternative Service Options
 
 ### SerpAPI Alternatives
-| Service | Cost per 1000 calls | Monthly (576k calls) | Savings |
-|---------|-------------------|---------------------|---------|
-| SerpAPI (current) | $10 | $5,750 | - |
-| Google Popular Times | $0.50 | $288 | $5,462 ✅ |
-| ScraperAPI | $1.50 | $864 | $4,886 ✅ |
-| Bright Data | $0.80 | $461 | $5,289 ✅ |
+--------------------------------------------------------------------------------
+| Service              | Cost per 1000 calls | Monthly (576k calls) | Savings   |
+|----------------------|---------------------|----------------------|-----------|
+| SerpAPI (current)    |         $10         |        $5,750        |     -     |
+| Google Popular Times |        $0.50        |         $288         | $5,462 ✅ |
+| ScraperAPI           |        $1.50        |         $864         | $4,886 ✅ |
+| Bright Data          |        $0.80        |         $461         | $5,289 ✅ |
+--------------------------------------------------------------------------------
 
 ### N8N Alternatives
-| Service | Cost | Features |
-|---------|------|----------|
-| N8N Cloud (current) | $300-500/mo | Managed, no limits |
-| N8N Self-hosted | $50-100/mo | On Railway, full control |
-| Zapier | $800+/mo | Easy, expensive |
-| Make.com | $200-400/mo | Mid-range option |
+----------------------------------------------------------------
+| Service             | Cost        |         Features         |
+|---------------------|-------------|--------------------------|
+| N8N Cloud (current) | $300-500/mo | Managed, no limits       |
+| N8N Self-hosted     | $50-100/mo  | On Railway, full control |
+| Zapier              | $800+/mo    | Easy, expensive          |
+| Make.com            | $200-400/mo | Mid-range option         |
+----------------------------------------------------------------
+
 
 ### Cloudinary Alternatives
-| Service | Cost | Storage | Bandwidth |
-|---------|------|---------|-----------|
-| Cloudinary (current) | $249/mo | 600GB | Unlimited |
-| AWS S3 + CloudFront | $80-150/mo | 500GB | 2TB |
-| Backblaze B2 | $50-80/mo | 500GB | 1TB |
-| BunnyCDN | $60-100/mo | 500GB | 2TB |
+-----------------------------------------------------------
+| Service              | Cost       | Storage | Bandwidth |
+|----------------------|------------|---------|-----------|
+| Cloudinary (current) | $249/mo    | 600GB   | Unlimited |
+| AWS S3 + CloudFront  | $80-150/mo | 500GB   |    2TB    |
+| Backblaze B2         | $50-80/mo  | 500GB   |    1TB    |
+| BunnyCDN             | $60-100/mo | 500GB   |    2TB    |
+-----------------------------------------------------------
 
----
+
 
 *Last updated: 2025-01-13*
 *Analysis based on 10,000 users, 200 venues, Brisbane market*
+
+
+
+
+
+
