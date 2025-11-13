@@ -408,6 +408,70 @@ app.post('/admin/trigger-busyness-refresh', async (req, res) => {
   }
 });
 
+// Batch update opening hours for multiple venues (admin use only)
+app.post('/admin/batch-update-hours', async (req, res) => {
+  try {
+    // Security: Only allow with correct admin key
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== process.env.ADMIN_SEED_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const { updates } = req.body; // Array of { category, hours } or { name, hours }
+
+    if (!updates || !Array.isArray(updates)) {
+      return res.status(400).json({ error: 'Invalid request format' });
+    }
+
+    let successCount = 0;
+    const results: any[] = [];
+
+    for (const update of updates) {
+      try {
+        if (update.name) {
+          // Update specific venue by name
+          const venue = await prisma.venue.findFirst({
+            where: { name: update.name }
+          });
+
+          if (venue) {
+            await prisma.venue.update({
+              where: { id: venue.id },
+              data: { openingHours: update.hours }
+            });
+            results.push({ type: 'name', target: update.name, status: 'success' });
+            successCount++;
+          }
+        } else if (update.category) {
+          // Update all venues of a category
+          const updateResult = await prisma.venue.updateMany({
+            where: { category: update.category },
+            data: { openingHours: update.hours }
+          });
+          results.push({ type: 'category', target: update.category, count: updateResult.count, status: 'success' });
+          successCount += updateResult.count;
+        }
+      } catch (error) {
+        results.push({ target: update.name || update.category, status: 'error', message: error instanceof Error ? error.message : 'Unknown error' });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Batch hours update completed',
+      updatedCount: successCount,
+      results
+    });
+
+  } catch (error) {
+    console.error('❌ Error in batch update:', error);
+    res.status(500).json({
+      error: 'Failed to batch update hours',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Update opening hours for all venues from Google Maps data (admin use only)
 app.post('/admin/update-opening-hours', async (req, res) => {
   try {
