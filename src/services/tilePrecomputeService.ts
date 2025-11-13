@@ -69,6 +69,7 @@ class TilePrecomputeService {
 
     try {
       const computeBounds = bounds || heatmapConfig.defaultBounds;
+      // Precompute ALL zoom levels from 11 to 20 for zero-lag experience
       const computeZooms = zoomLevels || [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
       console.log('🔥 Starting heat map tile precomputation...');
@@ -106,8 +107,9 @@ class TilePrecomputeService {
 
       console.log(`🎉 Heat map precomputation complete!`);
       console.log(`📊 Total tiles precomputed: ${totalTiles}`);
-      console.log(`⏱️  Duration: ${(duration / 1000).toFixed(2)}s`);
-      console.log(`🕐 Next refresh in ${heatmapConfig.tileUpdateInterval / 60}min`);
+      console.log(`⏱️  Duration: ${(duration / 1000).toFixed(2)}s (${(duration / 60000).toFixed(1)} minutes)`);
+      console.log(`🕐 Next refresh in ${heatmapConfig.tileUpdateInterval / 60} minutes`);
+      console.log(`💾 All tiles cached and ready for zero-lag delivery`);
 
     } catch (error) {
       console.error('❌ Error during tile precomputation:', error);

@@ -19,9 +19,9 @@ export const heatmapConfig = {
   // Gaussian blur parameters - increased for better visibility across zoom levels
   gaussianBlurSigma: 8, // Increased from 4 for more visible heat blooms
 
-  // Cache settings - shorter TTL for real-time updates
-  cacheTTL: parseInt(process.env.HEATMAP_CACHE_TTL || '300'), // 5 minutes (300 seconds) for real-time feel
-  tileUpdateInterval: parseInt(process.env.HEATMAP_UPDATE_INTERVAL || '300'), // 5 minutes for real-time updates
+  // Cache settings - 15-minute intervals for background updates
+  cacheTTL: parseInt(process.env.HEATMAP_CACHE_TTL || '900'), // 15 minutes (900 seconds)
+  tileUpdateInterval: parseInt(process.env.HEATMAP_UPDATE_INTERVAL || '900'), // 15 minutes for background updates
 
   // Performance settings
   maxVenuesPerTile: 1000, // Limit venues processed per tile

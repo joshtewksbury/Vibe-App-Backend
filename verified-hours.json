@@ -1,0 +1,29 @@
+{
+  "Breakfast Creek Hotel": {
+    "monday": "10am-2am",
+    "tuesday": "10am-2am",
+    "wednesday": "10am-2am",
+    "thursday": "10am-2am",
+    "friday": "10am-2am",
+    "saturday": "10am-2am",
+    "sunday": "10am-2am"
+  },
+  "The Caxton Hotel": {
+    "monday": "11am-12am",
+    "tuesday": "11am-12am",
+    "wednesday": "11am-1am",
+    "thursday": "11am-1am",
+    "friday": "11am-3am",
+    "saturday": "11am-3am",
+    "sunday": "11am-12am"
+  },
+  "Netherworld": {
+    "monday": "Closed",
+    "tuesday": "12pm-11pm",
+    "wednesday": "12pm-11pm",
+    "thursday": "12pm-11pm",
+    "friday": "12pm-1am",
+    "saturday": "12pm-1am",
+    "sunday": "12pm-11pm"
+  }
+}
