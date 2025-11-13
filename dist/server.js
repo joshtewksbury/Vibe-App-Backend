@@ -347,6 +347,51 @@ app.post('/admin/update-venue-hours', async (req, res) => {
         });
     }
 });
+// Manually trigger busyness refresh (admin use only)
+app.post('/admin/trigger-busyness-refresh', async (req, res) => {
+    try {
+        // Security: Only allow with correct admin key
+        const adminKey = req.headers['x-admin-key'];
+        if (adminKey !== process.env.ADMIN_SEED_KEY) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+        console.log('🔄 Manually triggering busyness refresh...');
+        // Import the scheduler
+        const { busynessScheduler } = require('./services/busynessScheduler');
+        // Check if scheduler is running
+        const isRunning = busynessScheduler.isRunning;
+        console.log(`Scheduler running status: ${isRunning}`);
+        // Trigger manual refresh
+        await busynessScheduler.fetchAndUpdateAllVenues();
+        // Get updated snapshot count
+        const snapshotCount = await prisma_1.default.busySnapshot.count();
+        const recentSnapshots = await prisma_1.default.busySnapshot.findMany({
+            orderBy: { timestamp: 'desc' },
+            take: 5,
+            select: {
+                timestamp: true,
+                venueId: true,
+                occupancyPercentage: true,
+                venue: { select: { name: true } }
+            }
+        });
+        res.status(200).json({
+            success: true,
+            message: 'Busyness refresh triggered successfully',
+            schedulerRunning: isRunning,
+            totalSnapshots: snapshotCount,
+            recentSnapshots
+        });
+    }
+    catch (error) {
+        console.error('❌ Error triggering busyness refresh:', error);
+        res.status(500).json({
+            error: 'Failed to trigger busyness refresh',
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+        });
+    }
+});
 // Database seed endpoint (admin use only - secured with environment variable)
 app.post('/admin/seed-database', async (req, res) => {
     try {
