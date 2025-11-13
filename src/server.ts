@@ -757,9 +757,12 @@ app.listen(PORT, () => {
   console.log('🔥 Starting heat map tile precomputation service...');
   tilePrecomputeService.startBackgroundRefresh();
 
-  // Start live busyness data scheduler
-  console.log('📊 Starting live busyness data scheduler (15-minute intervals)...');
-  busynessScheduler.start();
+  // ⏸️  PAUSED: Live busyness data scheduler (SerpAPI calls)
+  // 📊 Was making 19,200 calls/day = $5,750/month
+  // 💡 To re-enable: uncomment the line below
+  // console.log('📊 Starting live busyness data scheduler (15-minute intervals)...');
+  // busynessScheduler.start();
+  console.log('⏸️  Live busyness scheduler is PAUSED to reduce API costs');
 });
 
 export { app, prisma };
