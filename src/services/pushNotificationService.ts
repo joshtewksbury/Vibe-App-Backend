@@ -9,31 +9,60 @@ import prisma from '../lib/prisma';
 
 const APNS_KEY_ID = process.env.APNS_KEY_ID; // Your APNs key ID
 const APNS_TEAM_ID = process.env.APNS_TEAM_ID; // Your Apple Team ID
-const APNS_KEY_PATH = process.env.APNS_KEY_PATH; // Path to .p8 file
+const APNS_KEY_PATH = process.env.APNS_KEY_PATH; // Path to .p8 file (for local dev)
+const APNS_KEY = process.env.APNS_KEY; // Raw key content (for cloud deployment)
+const APNS_KEY_BASE64 = process.env.APNS_KEY_BASE64; // Base64 encoded key (for cloud deployment)
 const APNS_BUNDLE_ID = process.env.APNS_BUNDLE_ID || 'com.nightguide.VibeApp';
 const APNS_PRODUCTION = process.env.APNS_PRODUCTION === 'true';
 
 // Initialize APNs provider (will be null if credentials not configured)
 let apnProvider: apn.Provider | null = null;
 
-if (APNS_KEY_ID && APNS_TEAM_ID && APNS_KEY_PATH) {
+if (APNS_KEY_ID && APNS_TEAM_ID) {
   try {
-    apnProvider = new apn.Provider({
-      token: {
-        key: APNS_KEY_PATH,
-        keyId: APNS_KEY_ID,
-        teamId: APNS_TEAM_ID,
-      },
-      production: APNS_PRODUCTION,
-    });
-    console.log(`✅ APNs Provider initialized (${APNS_PRODUCTION ? 'production' : 'development'} mode)`);
+    let keyContent: string | undefined;
+
+    // Priority: base64 > raw content > file path
+    if (APNS_KEY_BASE64) {
+      // Decode base64 key
+      keyContent = Buffer.from(APNS_KEY_BASE64, 'base64').toString('utf8');
+      console.log('📝 Using base64-encoded APNs key from environment variable');
+    } else if (APNS_KEY) {
+      // Use raw key content
+      keyContent = APNS_KEY;
+      console.log('📝 Using raw APNs key from environment variable');
+    } else if (APNS_KEY_PATH) {
+      // Use file path (for local development)
+      keyContent = APNS_KEY_PATH;
+      console.log(`📝 Using APNs key from file: ${APNS_KEY_PATH}`);
+    }
+
+    if (keyContent) {
+      apnProvider = new apn.Provider({
+        token: {
+          key: keyContent,
+          keyId: APNS_KEY_ID,
+          teamId: APNS_TEAM_ID,
+        },
+        production: APNS_PRODUCTION,
+      });
+      console.log(`✅ APNs Provider initialized (${APNS_PRODUCTION ? 'production' : 'development'} mode)`);
+      console.log(`📱 Bundle ID: ${APNS_BUNDLE_ID}`);
+    } else {
+      console.log('⚠️ No APNs key provided (need APNS_KEY_BASE64, APNS_KEY, or APNS_KEY_PATH)');
+    }
   } catch (error) {
     console.error('❌ Failed to initialize APNs provider:', error);
     console.log('⚠️ Push notifications will not be sent');
   }
 } else {
   console.log('⚠️ APNs credentials not configured');
-  console.log('💡 Set APNS_KEY_ID, APNS_TEAM_ID, and APNS_KEY_PATH environment variables');
+  console.log('💡 Set these environment variables:');
+  console.log('   - APNS_KEY_ID (required)');
+  console.log('   - APNS_TEAM_ID (required)');
+  console.log('   - APNS_KEY_BASE64 or APNS_KEY or APNS_KEY_PATH (one required)');
+  console.log('   - APNS_BUNDLE_ID (optional, defaults to com.nightguide.VibeApp)');
+  console.log('   - APNS_PRODUCTION (optional, defaults to false)');
   console.log('💡 Push notifications will not be sent until configured');
 }
 
