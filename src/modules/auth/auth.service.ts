@@ -55,12 +55,14 @@ export class AuthService {
       }
     });
 
-    // Generate JWT token
+    // Generate JWT token and refresh token
     const token = this.generateToken(user.id, user.email);
+    const refreshToken = this.generateRefreshToken(user.id, user.email);
     const expiresAt = this.getTokenExpirationDate();
 
     return {
       token,
+      refreshToken,
       user,
       expiresAt
     };
@@ -93,12 +95,14 @@ export class AuthService {
       data: { lastActiveAt: new Date() }
     });
 
-    // Generate JWT token
+    // Generate JWT token and refresh token
     const token = this.generateToken(user.id, user.email);
+    const refreshToken = this.generateRefreshToken(user.id, user.email);
     const expiresAt = this.getTokenExpirationDate();
 
     return {
       token,
+      refreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -163,6 +167,17 @@ export class AuthService {
       { userId, email },
       this.jwtSecret,
       { expiresIn: this.jwtExpiresIn } as jwt.SignOptions
+    );
+  }
+
+  /**
+   * Generate refresh token (longer expiration)
+   */
+  private generateRefreshToken(userId: string, email: string): string {
+    return jwt.sign(
+      { userId, email, type: 'refresh' },
+      this.jwtSecret,
+      { expiresIn: '30d' } as jwt.SignOptions // Refresh tokens last longer
     );
   }
 

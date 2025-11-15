@@ -15,6 +15,7 @@ export interface SignInDTO {
 
 export interface AuthResponseDTO {
   token: string;
+  refreshToken: string;
   user: {
     id: string;
     email: string;
