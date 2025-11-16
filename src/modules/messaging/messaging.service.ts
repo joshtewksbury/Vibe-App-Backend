@@ -109,7 +109,7 @@ export class MessagingService {
     // Step 6: Format conversations (in memory - fast)
     const conversations = participations.map(participation => {
       const conversation = participation.conversation;
-      const participants = participantsByConversation.get(conversation.id) || [];
+      const participantUsers = participantsByConversation.get(conversation.id) || [];
       const lastMessage = lastMessageByConversation.get(conversation.id);
 
       // Calculate unread count (simplified)
@@ -121,7 +121,8 @@ export class MessagingService {
         id: conversation.id,
         type: conversation.type,
         name: conversation.name,
-        participants,
+        participants: participantUsers.map(u => u.id), // Array of user IDs
+        participantUsers: participantUsers, // Array of full user objects with profile images
         sharedEncryptionKey: conversation.sharedEncryptionKey,
         lastMessage: lastMessage ? {
           id: lastMessage.id,
