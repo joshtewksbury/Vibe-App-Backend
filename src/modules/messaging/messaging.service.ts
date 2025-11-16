@@ -507,6 +507,42 @@ export class MessagingService {
     // In a real implementation, this would emit a WebSocket event
     return { success: true, message: 'Typing indicator sent' };
   }
+
+  /**
+   * Delete an entire conversation (hard delete)
+   */
+  async deleteConversation(userId: string, conversationId: string) {
+    // Verify user is a participant
+    const participant = await prisma.conversationParticipant.findFirst({
+      where: {
+        conversationId,
+        userId,
+        isActive: true
+      }
+    });
+
+    if (!participant) {
+      throw new Error('Not a participant in this conversation');
+    }
+
+    // Delete all messages in the conversation
+    await prisma.message.deleteMany({
+      where: { conversationId }
+    });
+
+    // Delete all conversation participants
+    await prisma.conversationParticipant.deleteMany({
+      where: { conversationId }
+    });
+
+    // Delete the conversation
+    await prisma.conversation.delete({
+      where: { id: conversationId }
+    });
+
+    console.log(`✅ Deleted conversation ${conversationId} for user ${userId}`);
+    return { success: true, message: 'Conversation deleted' };
+  }
 }
 
 // Export singleton instance

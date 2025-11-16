@@ -53,4 +53,11 @@ router.delete('/:messageId', authMiddleware, (req, res) => messagingController.d
  */
 router.post('/conversations/:conversationId/typing', authMiddleware, (req, res) => messagingController.sendTypingIndicator(req, res));
 
+/**
+ * @route   DELETE /messages/conversations/:conversationId
+ * @desc    Delete an entire conversation (hard delete)
+ * @access  Private
+ */
+router.delete('/conversations/:conversationId', authMiddleware, (req, res) => messagingController.deleteConversation(req, res));
+
 export default router;

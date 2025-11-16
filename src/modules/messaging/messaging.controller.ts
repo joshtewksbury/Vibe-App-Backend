@@ -233,6 +233,35 @@ export class MessagingController {
       res.status(500).json({ error: 'Failed to send typing indicator' });
     }
   }
+
+  /**
+   * DELETE /messages/conversations/:conversationId
+   * Delete an entire conversation (hard delete)
+   */
+  async deleteConversation(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.userId;
+      const { conversationId } = req.params;
+
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+
+      const result = await messagingService.deleteConversation(userId, conversationId);
+
+      res.json(result);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes('Not a participant')) {
+          res.status(403).json({ error: error.message });
+          return;
+        }
+      }
+      console.error('Error deleting conversation:', error);
+      res.status(500).json({ error: 'Failed to delete conversation' });
+    }
+  }
 }
 
 // Export singleton instance
