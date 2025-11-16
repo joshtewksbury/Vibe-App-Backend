@@ -277,14 +277,55 @@ router.post('/conversations', authMiddleware, async (req: AuthRequest, res: Resp
     });
 
     if (existingParticipation) {
+      // IMPORTANT: If existing conversation has no encryption key, generate one now
+      if (!existingParticipation.conversation.sharedEncryptionKey) {
+        console.log(`⚠️ Existing conversation ${existingParticipation.conversation.id} has NO encryption key - generating one now`);
+        const crypto = require('crypto');
+        const key = crypto.randomBytes(32); // 256 bits
+        const keyBase64 = key.toString('base64');
+
+        const updatedConversation = await prisma.conversation.update({
+          where: { id: existingParticipation.conversation.id },
+          data: { sharedEncryptionKey: keyBase64 },
+          include: {
+            participants: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true
+                  }
+                }
+              }
+            }
+          }
+        });
+        console.log(`✅ Generated and saved encryption key for conversation ${existingParticipation.conversation.id}`);
+        return res.json({ conversation: updatedConversation });
+      }
+
       return res.json({ conversation: existingParticipation.conversation });
     }
 
-    // Create new conversation with shared encryption key
+    // CRITICAL: NEVER create a conversation without an encryption key!
+    // If client didn't send one, generate it server-side
+    let finalEncryptionKey = sharedEncryptionKey;
+    if (!finalEncryptionKey) {
+      console.log('⚠️ Client did not provide encryption key - generating one server-side');
+      const crypto = require('crypto');
+      const key = crypto.randomBytes(32); // 256 bits
+      finalEncryptionKey = key.toString('base64');
+      console.log('✅ Generated server-side encryption key');
+    }
+
+    // Create new conversation with shared encryption key (NEVER null!)
     const conversation = await prisma.conversation.create({
       data: {
         type: type as 'DIRECT' | 'GROUP',
-        sharedEncryptionKey: sharedEncryptionKey || null,
+        sharedEncryptionKey: finalEncryptionKey, // ALWAYS has a key
         participants: {
           create: [
             { userId: userId },
@@ -309,6 +350,7 @@ router.post('/conversations', authMiddleware, async (req: AuthRequest, res: Resp
       }
     });
 
+    console.log(`✅ Created conversation ${conversation.id} with encryption key`);
     res.status(201).json({ conversation });
   } catch (error) {
     console.error('Error creating conversation:', error);
@@ -548,6 +590,55 @@ router.post('/:messageId/read', authMiddleware, async (req: AuthRequest, res: Re
   } catch (error) {
     console.error('Error marking message as read:', error);
     res.status(500).json({ error: 'Failed to mark message as read' });
+  }
+});
+
+/**
+ * DELETE /messages/conversations/:conversationId
+ * Delete an entire conversation (hard delete)
+ */
+router.delete('/conversations/:conversationId', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { conversationId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Verify user is a participant
+    const participant = await prisma.conversationParticipant.findFirst({
+      where: {
+        conversationId,
+        userId,
+        isActive: true
+      }
+    });
+
+    if (!participant) {
+      return res.status(403).json({ error: 'Not a participant in this conversation' });
+    }
+
+    // Delete all messages in the conversation
+    await prisma.message.deleteMany({
+      where: { conversationId }
+    });
+
+    // Delete all conversation participants
+    await prisma.conversationParticipant.deleteMany({
+      where: { conversationId }
+    });
+
+    // Delete the conversation
+    await prisma.conversation.delete({
+      where: { id: conversationId }
+    });
+
+    console.log(`✅ Deleted conversation ${conversationId} for user ${userId}`);
+    res.json({ success: true, message: 'Conversation deleted' });
+  } catch (error) {
+    console.error('Error deleting conversation:', error);
+    res.status(500).json({ error: 'Failed to delete conversation' });
   }
 });
 
