@@ -317,6 +317,51 @@ router.post('/conversations', authMiddleware, async (req: AuthRequest, res: Resp
 });
 
 /**
+ * PATCH /messages/conversations/:conversationId/encryption-key
+ * Update the shared encryption key for a conversation
+ */
+router.patch('/conversations/:conversationId/encryption-key', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { conversationId } = req.params;
+    const { sharedEncryptionKey } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!sharedEncryptionKey) {
+      return res.status(400).json({ error: 'Shared encryption key required' });
+    }
+
+    // Verify user is a participant
+    const participant = await prisma.conversationParticipant.findFirst({
+      where: {
+        conversationId,
+        userId,
+        isActive: true
+      }
+    });
+
+    if (!participant) {
+      return res.status(403).json({ error: 'Not a participant in this conversation' });
+    }
+
+    // Update conversation with new encryption key
+    const updatedConversation = await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { sharedEncryptionKey }
+    });
+
+    console.log(`✅ Updated encryption key for conversation ${conversationId}`);
+    res.json({ success: true, conversation: updatedConversation });
+  } catch (error) {
+    console.error('Error updating conversation encryption key:', error);
+    res.status(500).json({ error: 'Failed to update encryption key' });
+  }
+});
+
+/**
  * POST /messages/send
  * Send an encrypted message
  */
