@@ -71,6 +71,44 @@ export class AuthController {
   }
 
   /**
+   * POST /auth/apple
+   * Sign in with Apple
+   */
+  async signInWithApple(req: Request, res: Response): Promise<void> {
+    try {
+      const { identityToken, appleUserID, firstName, lastName, email } = req.body;
+
+      if (!identityToken || !appleUserID) {
+        res.status(400).json({ error: 'Missing required fields: identityToken and appleUserID' });
+        return;
+      }
+
+      console.log('🍎 Apple Sign In request:', { appleUserID, email, firstName, lastName });
+
+      // Sign in with Apple
+      const result = await authService.signInWithApple({
+        identityToken,
+        appleUserID,
+        firstName,
+        lastName,
+        email
+      });
+
+      res.json({
+        message: 'Signed in with Apple successfully',
+        ...result
+      });
+    } catch (error) {
+      console.error('🍎 Apple Sign In error:', error);
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    }
+  }
+
+  /**
    * POST /auth/signout
    * Sign out (client-side token removal)
    */

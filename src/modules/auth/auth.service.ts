@@ -117,6 +117,83 @@ export class AuthService {
   }
 
   /**
+   * Sign in with Apple
+   */
+  async signInWithApple(data: {
+    identityToken: string;
+    appleUserID: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    email?: string | null;
+  }): Promise<AuthResponseDTO> {
+    const { appleUserID, firstName, lastName, email } = data;
+
+    console.log('🍎 AuthService: Looking for user with Apple ID:', appleUserID);
+
+    // Try to find existing user by Apple ID
+    let user = await prisma.user.findUnique({
+      where: { appleUserId: appleUserID }
+    });
+
+    if (user) {
+      console.log('🍎 AuthService: Existing user found:', user.id);
+
+      // Update last active time
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastActiveAt: new Date() }
+      });
+    } else {
+      console.log('🍎 AuthService: Creating new user for Apple ID:', appleUserID);
+
+      // Create new user
+      // Generate a unique email if one wasn't provided
+      const userEmail = email || `${appleUserID}@appleid.vibe.com`;
+
+      user = await prisma.user.create({
+        data: {
+          email: userEmail.toLowerCase(),
+          firstName: firstName || 'Apple',
+          lastName: lastName || 'User',
+          appleUserId: appleUserID,
+          passwordHash: '' // No password for Apple sign-in users
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          profileImage: true,
+          createdAt: true
+        }
+      });
+
+      console.log('🍎 AuthService: New user created:', user.id);
+    }
+
+    // Generate JWT token and refresh token
+    const token = this.generateToken(user.id, user.email);
+    const refreshToken = this.generateRefreshToken(user.id, user.email);
+    const expiresAt = this.getTokenExpirationDate();
+
+    return {
+      token,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        profileImage: user.profileImage,
+        createdAt: user.createdAt
+      },
+      expiresAt
+    };
+  }
+
+  /**
    * Refresh authentication token
    */
   async refreshToken(userId: string, email: string): Promise<{ token: string; expiresAt: Date }> {

@@ -20,6 +20,13 @@ router.post('/signup', asyncHandler((req, res) => authController.signUp(req, res
 router.post('/signin', asyncHandler((req, res) => authController.signIn(req, res)));
 
 /**
+ * @route   POST /auth/apple
+ * @desc    Sign in with Apple
+ * @access  Public
+ */
+router.post('/apple', asyncHandler((req, res) => authController.signInWithApple(req, res)));
+
+/**
  * @route   POST /auth/signout
  * @desc    Sign out current user
  * @access  Private

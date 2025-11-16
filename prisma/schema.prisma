@@ -16,6 +16,7 @@ model User {
   firstName        String
   lastName         String
   passwordHash     String
+  appleUserId      String?   @unique  // For Sign in with Apple
   dateOfBirth      DateTime?
   gender           Gender    @default(PREFER_NOT_TO_SAY)
   profileImage     String?
