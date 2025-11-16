@@ -20,6 +20,7 @@ export class MessagingService {
             id: true,
             type: true,
             name: true,
+            sharedEncryptionKey: true,
             updatedAt: true
           }
         }
@@ -121,6 +122,7 @@ export class MessagingService {
         type: conversation.type,
         name: conversation.name,
         participants,
+        sharedEncryptionKey: conversation.sharedEncryptionKey,
         lastMessage: lastMessage ? {
           id: lastMessage.id,
           senderId: lastMessage.senderId,
@@ -270,14 +272,55 @@ export class MessagingService {
     });
 
     if (existingParticipation) {
+      // IMPORTANT: If existing conversation has no encryption key, generate one now
+      if (!existingParticipation.conversation.sharedEncryptionKey) {
+        console.log(`⚠️ Existing conversation ${existingParticipation.conversation.id} has NO encryption key - generating one now`);
+        const crypto = require('crypto');
+        const key = crypto.randomBytes(32); // 256 bits
+        const keyBase64 = key.toString('base64');
+
+        const updatedConversation = await prisma.conversation.update({
+          where: { id: existingParticipation.conversation.id },
+          data: { sharedEncryptionKey: keyBase64 },
+          include: {
+            participants: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    profileImage: true
+                  }
+                }
+              }
+            }
+          }
+        });
+        console.log(`✅ Generated and saved encryption key for conversation ${existingParticipation.conversation.id}`);
+        return updatedConversation;
+      }
+
       return existingParticipation.conversation;
+    }
+
+    // CRITICAL: NEVER create a conversation without an encryption key!
+    // If client didn't send one, generate it server-side
+    let finalEncryptionKey = sharedEncryptionKey;
+    if (!finalEncryptionKey) {
+      console.log('⚠️ Client did not provide encryption key - generating one server-side');
+      const crypto = require('crypto');
+      const key = crypto.randomBytes(32); // 256 bits
+      finalEncryptionKey = key.toString('base64');
+      console.log('✅ Generated server-side encryption key');
     }
 
     // Create new conversation
     const conversation = await prisma.conversation.create({
       data: {
         type: type as 'DIRECT' | 'GROUP',
-        sharedEncryptionKey: sharedEncryptionKey || null,
+        sharedEncryptionKey: finalEncryptionKey, // ALWAYS has a key
         participants: {
           create: [
             { userId: userId },
