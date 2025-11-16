@@ -132,7 +132,16 @@ export class AuthService {
 
     // Try to find existing user by Apple ID
     let user = await prisma.user.findUnique({
-      where: { appleUserId: appleUserID }
+      where: { appleUserId: appleUserID },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        profileImage: true,
+        createdAt: true
+      }
     });
 
     if (user) {
