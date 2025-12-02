@@ -30,6 +30,7 @@ import storiesRoutes from './routes/stories';
 import accountSettingsRoutes from './routes/accountSettings';
 import eventsRoutes from './routes/events';
 import pushNotificationsRoutes from './routes/pushNotifications';
+import instagramRoutes from './routes/instagram';
 
 // Load environment variables
 config();
@@ -708,6 +709,7 @@ app.use('/image-proxy', imageProxyRoutes); // Image proxy for external images (I
 app.use('/users', userRoutes); // Users endpoint now public for search (individual routes can add auth as needed)
 app.use('/feed', authMiddleware, feedRoutes);
 app.use('/heatmap', heatmapRoutes); // Heat map routes include their own auth middleware
+app.use('/instagram', instagramRoutes); // Instagram scraping and posts
 app.use('/friends', friendsRoutes); // Friends routes include their own auth middleware
 app.use('/messages', messagesRoutes); // Messages routes include their own auth middleware
 app.use('/posts', postsRoutes); // Posts routes include their own auth middleware

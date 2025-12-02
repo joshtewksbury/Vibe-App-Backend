@@ -93,7 +93,9 @@ router.get('/', async (req: Request, res: Response) => {
       startTime: post.startTime?.toISOString() || null,
       endTime: post.endTime?.toISOString() || null,
       originalPrice: post.originalPrice,
-      discountPrice: post.discountPrice
+      discountPrice: post.discountPrice,
+      style: post.postStyle,
+      imageLayout: post.imageLayout
     }));
 
     res.json({ posts: formattedPosts });
@@ -111,12 +113,8 @@ router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest
   try {
     console.log('📝 POST /posts - Creating new post');
     console.log('📝 User ID:', req.user?.userId);
-    console.log('📝 Request body:', JSON.stringify(req.body, null, 2));
-    console.log('📝 File present:', !!req.file);
-    if (req.file) {
-      console.log('📝 File mimetype:', req.file.mimetype);
-      console.log('📝 File size:', req.file.size);
-    }
+    // Log body keys to see what's available
+    console.log('📝 Request body keys:', Object.keys(req.body));
 
     const userId = req.user?.userId;
 
@@ -252,7 +250,9 @@ router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest
       startTime: post.startTime?.toISOString() || null,
       endTime: post.endTime?.toISOString() || null,
       originalPrice: post.originalPrice,
-      discountPrice: post.discountPrice
+      discountPrice: post.discountPrice,
+      style: post.postStyle,
+      imageLayout: post.imageLayout
     };
 
     res.status(201).json({ post: formattedPost });
@@ -317,7 +317,35 @@ router.get('/:postId', async (req: Request, res: Response) => {
       data: { views: { increment: 1 } }
     });
 
-    res.json({ post });
+    // Format post to match iOS expectations
+    const formattedPost = {
+      id: post.id,
+      authorId: post.authorId,
+      authorName: `${post.author.firstName} ${post.author.lastName}`,
+      authorProfileImage: post.author.profileImage || null,
+      authorType: post.authorType,
+      venueId: post.venueId,
+      venueName: post.venue?.name || null,
+      postType: post.postType,
+      title: post.title,
+      content: post.content,
+      imageURL: post.mediaUrl,
+      timestamp: post.createdAt.toISOString(),
+      likes: post.likes,
+      isLiked: false, // TODO: Check if current user liked this post
+      comments: post.comments,
+      eventId: post.eventId,
+      dealId: post.dealId,
+      startTime: post.startTime?.toISOString() || null,
+      endTime: post.endTime?.toISOString() || null,
+      originalPrice: post.originalPrice,
+      discountPrice: post.discountPrice,
+      style: post.postStyle,
+      imageLayout: post.imageLayout,
+      postComments: post.postComments
+    };
+
+    res.json({ post: formattedPost });
   } catch (error) {
     console.error('Error fetching post:', error);
     res.status(500).json({ error: 'Failed to fetch post' });
@@ -624,6 +652,209 @@ router.get('/liked', authMiddleware, async (req: AuthRequest, res: Response) => 
   } catch (error) {
     console.error('Error fetching liked posts:', error);
     res.status(500).json({ error: 'Failed to fetch liked posts' });
+  }
+});
+
+/**
+ * POST /posts/:postId/share
+ * Share a post with friends via messages
+ */
+router.post('/:postId/share', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { postId } = req.params;
+    const { recipientIds, message } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!recipientIds || !Array.isArray(recipientIds) || recipientIds.length === 0) {
+      return res.status(400).json({ error: 'At least one recipient is required' });
+    }
+
+    // Verify post exists
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: {
+        id: true,
+        title: true,
+        authorId: true,
+        author: {
+          select: {
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    console.log(`📤 Sharing post ${postId} with ${recipientIds.length} recipients`);
+
+    // For now, we'll just track the share without actually creating messages
+    // In a full implementation, you'd create messages or notifications here
+
+    // Increment share count
+    await prisma.post.update({
+      where: { id: postId },
+      data: { shares: { increment: recipientIds.length } }
+    });
+
+    res.json({
+      message: 'Post shared successfully',
+      sharedWith: recipientIds.length
+    });
+  } catch (error) {
+    console.error('Error sharing post:', error);
+    res.status(500).json({ error: 'Failed to share post' });
+  }
+});
+
+/**
+ * POST /posts/:postId/save
+ * Save a post
+ */
+router.post('/:postId/save', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { postId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Check if already saved
+    const existing = await prisma.savedPost.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId
+        }
+      }
+    });
+
+    if (existing) {
+      return res.json({ success: true, message: 'Post already saved' });
+    }
+
+    await prisma.savedPost.create({
+      data: {
+        userId,
+        postId
+      }
+    });
+
+    res.json({ success: true, message: 'Post saved' });
+  } catch (error) {
+    console.error('Error saving post:', error);
+    res.status(500).json({ error: 'Failed to save post' });
+  }
+});
+
+/**
+ * DELETE /posts/:postId/save
+ * Unsave a post
+ */
+router.delete('/:postId/save', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { postId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    await prisma.savedPost.delete({
+      where: {
+        userId_postId: {
+          userId,
+          postId
+        }
+      }
+    });
+
+    res.json({ success: true, message: 'Post unsaved' });
+  } catch (error) {
+    console.error('Error unsaving post:', error);
+    res.status(500).json({ error: 'Failed to unsave post' });
+  }
+});
+
+/**
+ * POST /posts/:postId/report
+ * Report a post
+ */
+router.post('/:postId/report', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { postId } = req.params;
+    const { reason } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!reason) {
+      return res.status(400).json({ error: 'Reason is required' });
+    }
+
+    await prisma.reportedPost.create({
+      data: {
+        userId,
+        postId,
+        reason
+      }
+    });
+
+    res.json({ success: true, message: 'Post reported' });
+  } catch (error) {
+    console.error('Error reporting post:', error);
+    res.status(500).json({ error: 'Failed to report post' });
+  }
+});
+
+/**
+ * POST /posts/:postId/hide
+ * Hide a post
+ */
+router.post('/:postId/hide', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { postId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Check if already hidden
+    const existing = await prisma.hiddenPost.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId
+        }
+      }
+    });
+
+    if (existing) {
+      return res.json({ success: true, message: 'Post already hidden' });
+    }
+
+    await prisma.hiddenPost.create({
+      data: {
+        userId,
+        postId
+      }
+    });
+
+    res.json({ success: true, message: 'Post hidden' });
+  } catch (error) {
+    console.error('Error hiding post:', error);
+    res.status(500).json({ error: 'Failed to hide post' });
   }
 });
 

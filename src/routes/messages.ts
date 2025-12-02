@@ -22,7 +22,8 @@ router.get('/conversations', authMiddleware, async (req: AuthRequest, res: Respo
     const participations = await prisma.conversationParticipant.findMany({
       where: {
         userId: userId,
-        isActive: true
+        isActive: true,
+        isArchived: false // Filter out archived conversations
       },
       include: {
         conversation: {
@@ -105,7 +106,8 @@ router.get('/conversations', authMiddleware, async (req: AuthRequest, res: Respo
         } : null,
         lastActivity: conversation.updatedAt,
         unreadCount,
-        lastReadAt: participation.lastReadAt
+        lastReadAt: participation.lastReadAt,
+        isArchived: participation.isArchived
       };
     });
 
@@ -113,6 +115,45 @@ router.get('/conversations', authMiddleware, async (req: AuthRequest, res: Respo
   } catch (error) {
     console.error('Error fetching conversations:', error);
     res.status(500).json({ error: 'Failed to fetch conversations' });
+  }
+});
+
+/**
+ * POST /messages/conversations/:conversationId/archive
+ * Archive a conversation
+ */
+router.post('/conversations/:conversationId/archive', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    const { conversationId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Verify user is a participant
+    const participant = await prisma.conversationParticipant.findFirst({
+      where: {
+        conversationId,
+        userId,
+        isActive: true
+      }
+    });
+
+    if (!participant) {
+      return res.status(403).json({ error: 'Not a participant in this conversation' });
+    }
+
+    // Update archive status
+    await prisma.conversationParticipant.update({
+      where: { id: participant.id },
+      data: { isArchived: true }
+    });
+
+    res.json({ success: true, message: 'Conversation archived' });
+  } catch (error) {
+    console.error('Error archiving conversation:', error);
+    res.status(500).json({ error: 'Failed to archive conversation' });
   }
 });
 

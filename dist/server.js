@@ -67,6 +67,7 @@ const posts_1 = __importDefault(require("./routes/posts"));
 const stories_1 = __importDefault(require("./routes/stories"));
 const accountSettings_1 = __importDefault(require("./routes/accountSettings"));
 const events_1 = __importDefault(require("./routes/events"));
+const pushNotifications_1 = __importDefault(require("./routes/pushNotifications"));
 // Load environment variables
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
@@ -664,6 +665,7 @@ app.use('/posts', posts_1.default); // Posts routes include their own auth middl
 app.use('/stories', stories_1.default); // Stories routes include their own auth middleware
 app.use('/account', accountSettings_1.default); // Account settings routes with auth
 app.use('/events', events_1.default); // Events routes with auth
+app.use('/notifications', pushNotifications_1.default); // Push notification routes with auth
 // Sentry error handler must be registered before other error handlers
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
     app.use(Sentry.expressErrorHandler());
@@ -701,8 +703,11 @@ app.listen(PORT, () => {
     // Start background tile precomputation and refresh
     console.log('🔥 Starting heat map tile precomputation service...');
     tilePrecomputeService_1.tilePrecomputeService.startBackgroundRefresh();
-    // Start live busyness data scheduler
-    console.log('📊 Starting live busyness data scheduler (15-minute intervals)...');
-    busynessScheduler_1.busynessScheduler.start();
+    // ⏸️  PAUSED: Live busyness data scheduler (SerpAPI calls)
+    // 📊 Was making 19,200 calls/day = $5,750/month
+    // 💡 To re-enable: uncomment the line below
+    // console.log('📊 Starting live busyness data scheduler (15-minute intervals)...');
+    // busynessScheduler.start();
+    console.log('⏸️  Live busyness scheduler is PAUSED to reduce API costs');
 });
 //# sourceMappingURL=server.js.map

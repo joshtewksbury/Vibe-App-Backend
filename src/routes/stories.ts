@@ -10,7 +10,7 @@ const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB limit for stories (videos can be large)
+    fileSize: 50 * 1024 * 1024, // 50MB limit for snapshots (15-second videos)
   },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
@@ -23,7 +23,8 @@ const upload = multer({
 
 /**
  * GET /stories
- * Get all active stories (not expired), grouped by author/venue
+ * Get all active snapshots (not expired), grouped by author/venue
+ * Snapshots are 15-second videos showing real-time venue vibes
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
@@ -32,7 +33,7 @@ router.get('/', async (req: Request, res: Response) => {
     const where: any = {
       isActive: true,
       expiresAt: {
-        gt: new Date() // Only get non-expired stories
+        gt: new Date() // Only get non-expired snapshots
       }
     };
 
@@ -51,6 +52,14 @@ router.get('/', async (req: Request, res: Response) => {
             venueIconUrl: true,
             location: true
           }
+        },
+        author: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profileImage: true
+          }
         }
       },
       orderBy: {
@@ -58,83 +67,116 @@ router.get('/', async (req: Request, res: Response) => {
       }
     });
 
-    // Group stories by author/venue
+    // Group snapshots by author/venue
     const groupedStories = stories.reduce((acc: any, story) => {
       const key = story.venueId || story.authorId;
       if (!acc[key]) {
         acc[key] = {
           id: key,
           venueId: story.venueId,
-          venueName: story.venue?.name || 'User',
+          venueName: story.venue?.name || `${story.author.firstName} ${story.author.lastName}`,
           venueCategory: story.venue?.category,
-          venueLogoURL: story.venue?.venueIconUrl,
+          venueLogoURL: story.venue?.venueIconUrl || story.author.profileImage,
           stories: []
         };
       }
-      acc[key].stories.push(story);
+      acc[key].stories.push({
+        id: story.id,
+        venueId: story.venueId,
+        venueName: story.venue?.name || `${story.author.firstName} ${story.author.lastName}`,
+        authorId: story.authorId,
+        authorName: `${story.author.firstName} ${story.author.lastName}`,
+        authorType: story.authorType.toLowerCase(),
+        mediaURL: story.mediaUrl,
+        mediaType: story.mediaType.toLowerCase(),
+        thumbnailUrl: story.thumbnailUrl,
+        timestamp: story.createdAt.toISOString(),
+        expiresAt: story.expiresAt.toISOString(),
+        caption: story.caption,
+        viewers: story.views,
+        isViewed: false
+      });
       return acc;
     }, {});
 
     res.json({ storyGroups: Object.values(groupedStories) });
   } catch (error) {
-    console.error('Error fetching stories:', error);
-    res.status(500).json({ error: 'Failed to fetch stories' });
+    console.error('Error fetching snapshots:', error);
+    res.status(500).json({ error: 'Failed to fetch snapshots' });
   }
 });
 
 /**
  * POST /stories
- * Create a new story with media upload (required)
+ * Create a new snapshot with video upload (required)
+ * Snapshots are 15-second videos showing real-time venue vibes
  */
 router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest, res: Response) => {
   try {
+    console.log('📸 POST /stories - Creating new snapshot');
+    console.log('📸 User ID:', req.user?.userId);
+    console.log('📸 File present:', !!req.file);
+    if (req.file) {
+      console.log('📸 File mimetype:', req.file.mimetype);
+      console.log('📸 File size:', req.file.size, 'bytes');
+    }
+
     const userId = req.user?.userId;
 
     if (!userId) {
+      console.log('❌ No userId found in request');
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     if (!req.file) {
-      return res.status(400).json({ error: 'Media file is required for stories' });
+      console.log('❌ No media file provided');
+      return res.status(400).json({ error: 'Video file is required for snapshots' });
     }
 
     const { venueId, caption, location } = req.body;
 
-    // Upload media to Cloudinary
+    // Snapshots should be videos only
     const isVideo = req.file.mimetype.startsWith('video/');
-    const resourceType = isVideo ? 'video' : 'image';
+    if (!isVideo) {
+      console.log('❌ Invalid file type - snapshots must be videos');
+      return res.status(400).json({ error: 'Snapshots must be video files (15 seconds max)' });
+    }
 
+    console.log('☁️ Uploading video to Cloudinary...');
+    // Upload video to Cloudinary with optimizations for 15-second snapshots
     const uploadResult = await uploadFile(
       req.file.buffer,
-      'stories',
-      resourceType
+      'snapshots',
+      'video'
     );
+    console.log('✅ Video uploaded:', uploadResult.secureUrl);
 
-    let thumbnailUrl: string | undefined;
-    if (isVideo) {
-      thumbnailUrl = getVideoThumbnail(uploadResult.publicId);
-    }
+    // Generate thumbnail for video
+    const thumbnailUrl = getVideoThumbnail(uploadResult.publicId);
+    console.log('✅ Thumbnail generated:', thumbnailUrl);
 
     // Determine author type
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { role: true, venueIds: true }
+      select: { role: true, venueIds: true, firstName: true, lastName: true }
     });
 
     const authorType = user?.role === 'VENUE_MANAGER' && venueId ? 'VENUE' : 'USER';
+    console.log('✍️ Author type:', authorType);
 
-    // Stories expire after 24 hours
+    // Snapshots expire after 24 hours
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
-    // Create story
+    // Create snapshot
+    console.log('💾 Creating snapshot in database...');
     const story = await prisma.story.create({
       data: {
         authorId: userId,
         authorType,
         venueId: venueId || null,
         mediaUrl: uploadResult.secureUrl,
-        mediaType: isVideo ? 'VIDEO' : 'IMAGE',
+        mediaType: 'VIDEO',
         thumbnailUrl,
         caption: caption || null,
         location: location || null,
@@ -149,14 +191,50 @@ router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest
             venueIconUrl: true,
             location: true
           }
+        },
+        author: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profileImage: true
+          }
         }
       }
     });
 
-    res.status(201).json({ story });
+    console.log('✅ Snapshot created successfully:', story.id);
+
+    // Format response
+    const formattedStory = {
+      id: story.id,
+      venueId: story.venueId,
+      venueName: story.venue?.name || `${story.author.firstName} ${story.author.lastName}`,
+      authorId: story.authorId,
+      authorName: `${story.author.firstName} ${story.author.lastName}`,
+      authorType: story.authorType.toLowerCase(),
+      mediaURL: story.mediaUrl,
+      mediaType: story.mediaType.toLowerCase(),
+      thumbnailUrl: story.thumbnailUrl,
+      timestamp: story.createdAt.toISOString(),
+      expiresAt: story.expiresAt.toISOString(),
+      caption: story.caption,
+      viewers: story.views,
+      isViewed: false
+    };
+
+    res.status(201).json({ story: formattedStory });
   } catch (error) {
-    console.error('Error creating story:', error);
-    res.status(500).json({ error: 'Failed to create story' });
+    console.error('❌ Error creating snapshot:', error);
+    console.error('❌ Error details:', JSON.stringify(error, null, 2));
+    if (error instanceof Error) {
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+    }
+    res.status(500).json({
+      error: 'Failed to create snapshot',
+      details: error instanceof Error ? error.message : String(error)
+    });
   }
 });
 

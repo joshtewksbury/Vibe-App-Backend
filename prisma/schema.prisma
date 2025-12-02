@@ -58,6 +58,11 @@ model User {
   settings         UserSettings?
   deletionRequest  AccountDeletionRequest?
 
+  // Post interactions
+  savedPosts       SavedPost[]
+  reportedPosts    ReportedPost[]
+  hiddenPosts      HiddenPost[]
+
   @@map("users")
 }
 
@@ -153,6 +158,11 @@ model Venue {
   businessStatus   String?
   popularTimes     Json?            // Google Popular Times data from SerpAPI
   popularTimesUpdated DateTime?     // When popular times were last fetched
+
+  // Instagram integration
+  instagramUsername String?         // Instagram handle (without @)
+  instagramLastSynced DateTime?     // Last time Instagram posts were synced
+
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
@@ -165,6 +175,7 @@ model Venue {
   events           Event[]
   stories          Story[]
   venueImages      VenueImage[]
+  instagramPosts   VenueInstagramPost[]
 
   @@map("venues")
 }
@@ -213,6 +224,7 @@ model Post {
   likes      Int      @default(0)
   comments   Int      @default(0)
   views      Int      @default(0)
+  shares     Int      @default(0)
 
   // Flags
   isActive   Boolean  @default(true)
@@ -226,6 +238,9 @@ model Post {
 
   postLikes    PostLike[]
   postComments PostComment[]
+  savedBy      SavedPost[]
+  reportedBy   ReportedPost[]
+  hiddenBy     HiddenPost[]
 
   @@map("posts")
   @@index([venueId])
@@ -632,6 +647,7 @@ model ConversationParticipant {
   lastReadAt     DateTime @default(now())
   leftAt         DateTime?
   isActive       Boolean  @default(true)
+  isArchived     Boolean  @default(false)
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -640,6 +656,68 @@ model ConversationParticipant {
   @@map("conversation_participants")
   @@index([userId])
   @@index([conversationId])
+}
+
+// ... (SavedPost, ReportedPost, HiddenPost models added previously)
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+enum MessageType {
+  TEXT
+  VENUE_SHARE
+  LOCATION_SHARE
+  MEETUP_REQUEST
+  IMAGE
+  VIDEO
+}
+
+model SavedPost {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("saved_posts")
+  @@index([userId])
+}
+
+model ReportedPost {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  reason    String
+  status    ReportStatus @default(PENDING)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("reported_posts")
+  @@index([userId])
+  @@index([postId])
+}
+
+model HiddenPost {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("hidden_posts")
+  @@index([userId])
 }
 
 model Message {
@@ -703,14 +781,7 @@ enum ConversationType {
   GROUP
 }
 
-enum MessageType {
-  TEXT
-  VENUE_SHARE
-  LOCATION_SHARE
-  MEETUP_REQUEST
-  IMAGE
-  VIDEO
-}
+
 
 // Heat map tile caching for fast performance
 model HeatMapTile {
@@ -866,6 +937,42 @@ enum DeletionStatus {
   CANCELLED    // User cancelled deletion
   COMPLETED    // Account deleted
 }
+
+// MARK: - Instagram Integration
+
+model VenueInstagramPost {
+  id           String   @id @default(cuid())
+  instagramId  String   @unique  // Instagram's unique post ID
+  venueId      String
+  venue        Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  // Post content
+  caption      String?  @db.Text
+  mediaType    String   // IMAGE, VIDEO, CAROUSEL_ALBUM
+  mediaUrl     String   // URL to the main image/video
+  videoUrl     String?  // URL to video if mediaType is VIDEO
+  permalink    String   // Link to Instagram post
+  username     String   // Instagram username
+
+  // Post metadata
+  postedAt     DateTime // When posted on Instagram
+
+  // Engagement metrics
+  likesCount   Int      @default(0)
+  commentsCount Int     @default(0)
+  videoViewCount Int?   // Only for videos
+
+  // System metadata
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([venueId])
+  @@index([postedAt])
+  @@index([venueId, postedAt])
+  @@map("venue_instagram_posts")
+}
+
+// MARK: - Enums
 
 enum EventSource {
   USER_CREATED  // Event created by venue or user
