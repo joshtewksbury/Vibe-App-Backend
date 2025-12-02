@@ -79,7 +79,7 @@ export class ApifyInstagramScraperService {
 
       console.log(`📊 Found ${items.length} posts for @${username}`);
 
-      return items as ApifyInstagramPost[];
+      return items as unknown as ApifyInstagramPost[];
     } catch (error) {
       console.error(`❌ Failed to scrape @${username}:`, error);
       throw error;
@@ -113,7 +113,7 @@ export class ApifyInstagramScraperService {
       // Group posts by username
       const postsByUsername = new Map<string, ApifyInstagramPost[]>();
 
-      for (const item of items as ApifyInstagramPost[]) {
+      for (const item of items as unknown as ApifyInstagramPost[]) {
         const username = item.ownerUsername;
         if (!postsByUsername.has(username)) {
           postsByUsername.set(username, []);

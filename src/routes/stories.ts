@@ -52,14 +52,6 @@ router.get('/', async (req: Request, res: Response) => {
             venueIconUrl: true,
             location: true
           }
-        },
-        author: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            profileImage: true
-          }
         }
       },
       orderBy: {
@@ -74,18 +66,18 @@ router.get('/', async (req: Request, res: Response) => {
         acc[key] = {
           id: key,
           venueId: story.venueId,
-          venueName: story.venue?.name || `${story.author.firstName} ${story.author.lastName}`,
+          venueName: story.venue?.name || 'User Story',
           venueCategory: story.venue?.category,
-          venueLogoURL: story.venue?.venueIconUrl || story.author.profileImage,
+          venueLogoURL: story.venue?.venueIconUrl || null,
           stories: []
         };
       }
       acc[key].stories.push({
         id: story.id,
         venueId: story.venueId,
-        venueName: story.venue?.name || `${story.author.firstName} ${story.author.lastName}`,
+        venueName: story.venue?.name || 'User Story',
         authorId: story.authorId,
-        authorName: `${story.author.firstName} ${story.author.lastName}`,
+        authorName: 'User',
         authorType: story.authorType.toLowerCase(),
         mediaURL: story.mediaUrl,
         mediaType: story.mediaType.toLowerCase(),
@@ -191,14 +183,6 @@ router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest
             venueIconUrl: true,
             location: true
           }
-        },
-        author: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            profileImage: true
-          }
         }
       }
     });
@@ -209,9 +193,9 @@ router.post('/', authMiddleware, upload.single('media'), async (req: AuthRequest
     const formattedStory = {
       id: story.id,
       venueId: story.venueId,
-      venueName: story.venue?.name || `${story.author.firstName} ${story.author.lastName}`,
+      venueName: story.venue?.name || 'User Story',
       authorId: story.authorId,
-      authorName: `${story.author.firstName} ${story.author.lastName}`,
+      authorName: 'User',
       authorType: story.authorType.toLowerCase(),
       mediaURL: story.mediaUrl,
       mediaType: story.mediaType.toLowerCase(),
