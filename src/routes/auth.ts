@@ -15,7 +15,22 @@ router.post('/signup', asyncHandler(async (req: Request, res: Response) => {
     throw createError(error.details[0].message, 400);
   }
 
-  const { email, password, firstName, lastName } = value;
+  const { email, password, firstName, lastName, dateOfBirth } = value;
+
+  // Validate age (must be 18+)
+  if (dateOfBirth) {
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    if (age < 18) {
+      throw createError('You must be 18 or older to use Vibe', 400);
+    }
+  }
 
   // Check if user already exists
   const existingUser = await prisma.user.findUnique({
@@ -36,7 +51,8 @@ router.post('/signup', asyncHandler(async (req: Request, res: Response) => {
       email: email.toLowerCase(),
       firstName,
       lastName,
-      passwordHash
+      passwordHash,
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null
     },
     select: {
       id: true,
