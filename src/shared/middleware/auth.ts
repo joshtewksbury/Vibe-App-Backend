@@ -48,7 +48,12 @@ export const authMiddleware = async (
   try {
     const authHeader = req.headers.authorization;
 
+    console.log('🔐 Auth middleware - Path:', req.path);
+    console.log('🔐 Auth middleware - Method:', req.method);
+    console.log('🔐 Auth middleware - Has auth header:', !!authHeader);
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ Auth middleware - Invalid or missing Bearer token');
       return res.status(401).json({
         error: 'Unauthorized',
         message: 'No valid authentication token provided'
@@ -56,6 +61,8 @@ export const authMiddleware = async (
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    console.log('🔐 Auth middleware - Token length:', token.length);
+    console.log('🔐 Auth middleware - Token preview:', token.substring(0, 20) + '...');
 
     // Check if this is the admin API key (for N8N/automation tools)
     if (process.env.ADMIN_API_KEY && token === process.env.ADMIN_API_KEY) {
@@ -79,11 +86,14 @@ export const authMiddleware = async (
     }
 
     // Verify JWT token
+    console.log('🔐 Auth middleware - Verifying JWT token with secret');
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as any;
+    console.log('✅ Auth middleware - Token verified, userId:', decoded.userId);
 
     // Check cache first to avoid database query
     const now = Date.now();
     const cached = userCache.get(decoded.userId);
+    console.log('🔐 Auth middleware - Cache check:', cached ? 'HIT' : 'MISS');
 
     let user: {
       id: string;
@@ -110,12 +120,14 @@ export const authMiddleware = async (
       });
 
       if (!dbUser) {
+        console.log('❌ Auth middleware - User not found in database:', decoded.userId);
         return res.status(401).json({
           error: 'Unauthorized',
           message: 'User not found'
         });
       }
 
+      console.log('✅ Auth middleware - User found in database:', dbUser.id);
       user = dbUser;
 
       // Update cache
