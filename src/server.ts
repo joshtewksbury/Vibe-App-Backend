@@ -32,8 +32,8 @@ import accountSettingsRoutes from './routes/accountSettings';
 import eventsRoutes from './routes/events';
 import pushNotificationsRoutes from './routes/pushNotifications';
 import instagramRoutes from './routes/instagram';
-import beaconRoutes from './routes/beacons';
-import ratingsRoutes from './routes/ratings';
+// import beaconRoutes from './routes/beacons'; // Removed - schema incompatibilities
+// import ratingsRoutes from './routes/ratings'; // Removed - schema incompatibilities
 // import dashboardRoutes from './routes/dashboard'; // Temporarily disabled - has TypeScript errors
 // import budgetRoutes from './routes/budget'; // Temporarily disabled - needs schema updates
 
@@ -722,8 +722,8 @@ app.use('/stories', storiesRoutes); // Stories routes include their own auth mid
 app.use('/account', accountSettingsRoutes); // Account settings routes with auth
 app.use('/events', eventsRoutes); // Events routes with auth
 app.use('/notifications', pushNotificationsRoutes); // Push notification routes with auth
-app.use('/api/beacons', beaconRoutes); // Beacon routes (no auth required for ESP32 devices)
-app.use('/api/ratings', ratingsRoutes); // Rating routes with mixed auth (GET public, POST requires auth)
+// app.use('/api/beacons', beaconRoutes); // Removed - schema incompatibilities
+// app.use('/api/ratings', ratingsRoutes); // Removed - schema incompatibilities
 // app.use('/api/budget', budgetRoutes); // Budget planner routes with auth - TEMPORARILY DISABLED - needs schema updates
 // app.use('/api/dashboard', dashboardRoutes); // Dashboard routes with auth - TEMPORARILY DISABLED DUE TO TS ERRORS
 
