@@ -9,6 +9,7 @@ import { rateLimitMiddleware } from './shared/middleware/rateLimiting';
 import { errorHandler } from './shared/middleware/errorHandler';
 import { auditLogger } from './shared/middleware/auditLogger';
 import { tilePrecomputeService } from './services/tilePrecomputeService';
+import { heatmapPrecomputeService } from './services/heatmapPrecomputeService';
 import { busynessScheduler } from './services/busynessScheduler';
 import prisma from './lib/prisma';
 
@@ -31,12 +32,16 @@ import accountSettingsRoutes from './routes/accountSettings';
 import eventsRoutes from './routes/events';
 import pushNotificationsRoutes from './routes/pushNotifications';
 import instagramRoutes from './routes/instagram';
+import beaconRoutes from './routes/beacons';
+import ratingsRoutes from './routes/ratings';
+import dashboardRoutes from './routes/dashboard';
+// import budgetRoutes from './routes/budget'; // Temporarily disabled - needs schema updates
 
 // Load environment variables
 config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
 // Initialize Sentry for error tracking (production only)
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
@@ -717,6 +722,10 @@ app.use('/stories', storiesRoutes); // Stories routes include their own auth mid
 app.use('/account', accountSettingsRoutes); // Account settings routes with auth
 app.use('/events', eventsRoutes); // Events routes with auth
 app.use('/notifications', pushNotificationsRoutes); // Push notification routes with auth
+app.use('/api/beacons', beaconRoutes); // Beacon routes (no auth required for ESP32 devices)
+app.use('/api/ratings', ratingsRoutes); // Rating routes with mixed auth (GET public, POST requires auth)
+// app.use('/api/budget', budgetRoutes); // Budget planner routes with auth - TEMPORARILY DISABLED - needs schema updates
+// app.use('/api/dashboard', dashboardRoutes); // Dashboard routes with auth - TEMPORARILY DISABLED DUE TO TS ERRORS
 
 // Sentry error handler must be registered before other error handlers
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
@@ -752,7 +761,7 @@ process.on('SIGTERM', async () => {
 });
 app.use(imageRoutes);
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
@@ -760,6 +769,10 @@ app.listen(PORT, () => {
   // Start background tile precomputation and refresh
   console.log('🔥 Starting heat map tile precomputation service...');
   tilePrecomputeService.startBackgroundRefresh();
+
+  // Start 15-minute heatmap precomputation service
+  console.log('🔥 Starting heatmap tile precomputation service (15 min intervals)...');
+  heatmapPrecomputeService.start();
 
   // ⏸️  PAUSED: Live busyness data scheduler (SerpAPI calls)
   // 📊 Was making 19,200 calls/day = $5,750/month
