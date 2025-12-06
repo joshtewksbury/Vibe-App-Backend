@@ -598,3 +598,4 @@ export class MessagingService {
 
 // Export singleton instance
 export const messagingService = new MessagingService();
+
