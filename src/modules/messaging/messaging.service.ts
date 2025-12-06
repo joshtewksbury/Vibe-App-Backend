@@ -219,18 +219,25 @@ export class MessagingService {
   async createConversation(userId: string, data: CreateConversationDTO) {
     const { friendId, type = 'DIRECT', sharedEncryptionKey } = data;
 
-    // Verify friendship exists
-    const friendship = await prisma.friendship.findFirst({
-      where: {
-        OR: [
-          { initiatorId: userId, receiverId: friendId, status: 'ACCEPTED' },
-          { initiatorId: friendId, receiverId: userId, status: 'ACCEPTED' }
-        ]
-      }
-    });
+    // Support user ID - allow conversations with support without friendship requirement
+    const SUPPORT_USER_ID = 'cmiu7zgjt00008h7sivpgs4xr';
 
-    if (!friendship) {
-      throw new Error('Must be friends to start a conversation');
+    // Verify friendship exists (unless conversing with support user)
+    const isSupportConversation = friendId === SUPPORT_USER_ID || userId === SUPPORT_USER_ID;
+
+    if (!isSupportConversation) {
+      const friendship = await prisma.friendship.findFirst({
+        where: {
+          OR: [
+            { initiatorId: userId, receiverId: friendId, status: 'ACCEPTED' },
+            { initiatorId: friendId, receiverId: userId, status: 'ACCEPTED' }
+          ]
+        }
+      });
+
+      if (!friendship) {
+        throw new Error('Must be friends to start a conversation');
+      }
     }
 
     // Check if conversation already exists
